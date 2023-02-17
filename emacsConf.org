@@ -1,0 +1,858 @@
+#+title: Emacs config
+#+PROPERTY: header-args:emacs-lisp :tangle init.el :mkdirp yes
+
+* Start up
+** Garbage collection
+#+begin_src emacs-lisp 
+  ;; Minimize garbage collection during startup
+  (setq gc-cons-threshold most-positive-fixnum)
+
+  ;; Lower threshold to speed up garbage collection
+  (add-hook 'emacs-statup-hook
+            (lambda()
+              (setq gc-cons-threshold (* 5 1000 1000))))
+#+end_src
+
+* Package management 
+** Package list
+#+begin_src emacs-lisp 
+  ;;;PACKAGE LIST
+  (setq package-archives
+        '(("melpa" . "https://melpa.org/packages/")
+          ("org" . "https://orgmode.org/elpa/")
+          ("elpa" . "https://elpa.gnu.org/packages/")))
+#+end_src
+
+** Bootstrap use-package
+#+begin_src emacs-lisp 
+  ;;; BOOTSTRAP USE-PACKAGES
+  (package-initialize)
+  (setq use-package-always-ensure t)
+  (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+  (eval-when-compile (require 'use-package))
+#+end_src
+
+** Package update
+#+begin_src emacs-lisp 
+  ;;; PACKAGE UPDATE
+  (use-package auto-package-update
+    :custom
+    (auto-package-update-interval 7)
+    (auto-package-update-prompt-before-update t)
+    (auto-package-update-hide-results t)
+    :config
+    (auto-package-update-maybe)
+    (auto-package-update-at-time "09:00"))
+#+end_src
+
+* Language spelling and typing 
+#+begin_src emacs-lisp 
+  ;;; LANGUAGE SPELLING AND TYPING
+  (set-input-method 'spanish-prefix)
+  (use-package guess-language  ;Automatically detect language for Flyspell
+    :ensure t
+    :defer t
+    :init (add-hook 'text-mode-hook #'guess-language-mode)
+    :config
+    (setq guess-language-langcodes '((en . ("en_US" "English"))
+                                     (pt . ("pt_PT" "Portuguese"))
+                                     (es . ("es_ES" "Spanish")))
+          guess-language-languages '(en es)
+          guess-language-min-paragraph-length 45)
+    :diminish guess-language-mode)
+#+end_src
+
+* Keybinds
+#+begin_src emacs-lisp 
+  ;;; KEYBINDS
+  (use-package general
+    :after evil
+    :config
+    (general-create-definer efs/leader-keys
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "M-SPC")
+
+    (efs/leader-keys
+      "n" '((lambda() (interactive)(find-file "~/notes/tasks.org")) :which-key "org file with tasks")
+      "C-s" '((lambda() (interactive)(set-input-method "spanish-prefix")) :which-key "change input method to spanish")
+      "C-p" '((lambda() (interactive)(set-input-method "portuguese-prefix")) :which-key "change input method to portuguese")
+      "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
+      "t" '(vterm :which-key "teminal")
+      "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
+      "c" '(cfw:open-org-calendar :which-key "calendar")
+      "d" '(dired :which-key "dired")
+      "f" '(find-file :which-key "find file")
+      "e" '(flycheck-list-errors :which-key "list of errors in code")
+      "b" '(switch-to-buffer :which-key "buffer menu")
+      "k" '(kill-buffer :which-key "kill buffer")
+      "C-b" '(ibuffer :which-key "kill buffer")
+      "s" '(search :which-key "search in browser")
+      ))
+#+end_src
+
+* UI
+** basic UI setup
+#+begin_src emacs-lisp
+  ;;; UI
+  (setq inhibit-startup-message t)
+
+  (scroll-bar-mode -1)        ; Disable visible scrollbar
+  (tool-bar-mode -1)          ; Disable the toolbar
+  (tooltip-mode -1)           ; Disable tooltips
+  (set-fringe-mode 10)        ; Give some breathing room
+  (menu-bar-mode -1)          ; Disable the menu bar
+
+  ;; Set up the visible bell
+  (setq visible-bell t)
+
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  ;; Set frame transparency
+  ;; (defvar efs/frame-transparency '(80 . 80))
+  ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
+  ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
+  ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+  ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+                  cfw:calendar-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  term-mode-hook
+                  vterm-mode-hook
+                  eshell-mode-hook))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+  ;;modeline
+  (use-package all-the-icons
+    :ensure t)
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 28)))
+#+end_src
+
+** Theme
+#+begin_src emacs-lisp
+;;; THEME
+;; Customizations prior to loading the themes
+(setq modus-themes-italic-constructs t
+      modus-themes-bold-constructs t
+      modus-themes-mixed-fonts t
+      modus-themes-variable-pitch-ui t
+      modus-themes-org-blocks 'gray-background)
+
+(setq modus-vivendi-tinted-palette-overrides
+      '(
+      (bg-main          "#090a11")
+      (bg-dim           "#121319")
+      (fg-main          "#ffffff")
+      (fg-dim           "#aeb3bf")
+      (fg-alt           "#d3dae8")
+      (bg-active        "#414259")
+      (bg-inactive      "#252633")
+      (border           "#252633")
+
+      (gray            "#121319")
+      (gray-faint      "#252633")
+      (gray-light      "#414259")
+      (whiteish        "#d3dae8")
+      (light-gray      "#aeb3bf")
+
+      (red             "#d1143d")
+      (red-faint       "#d1536e")
+      (red-intense     red)
+      (red-warmer      red)
+      (red-cooler      red-faint)
+
+      (green           "#14cc4b")
+      (green-faint     "#59b274")
+      (green-intense   green)
+      (green-warmer    green)
+      (green-cooler    green-faint)
+
+      (yellow          "#ddab16")
+      (yellow-faint    "#ddc26e")
+      (yellow-intense  "#efef00")
+      (yellow-warmer   orange)
+      (yellow-cooler   yellow-faint)
+
+      (blue            "#1861f4")
+      (blue-faint      "#7aa3f4")
+      (blue-intense    blue)
+      (blue-warmer     blue)
+      (blue-cooler     blue-faint)
+
+      (magenta         "#ea2eb8")
+      (magenta-faint   "#ea75cb")
+      (magenta-intense magenta)
+      (magenta-warmer  magenta-faint)
+      (magenta-cooler  purple-faint)
+
+      (cyan            "#14b0cc")
+      (cyan-faint      "#51b9cc")
+      (cyan-intense    cyan)
+      (cyan-warmer     cyan)
+      (cyan-cooler     cyan-faint)
+
+      (purple          "#6614d1")
+      (purple-faint    "#8a53d1")
+      (orange          "#e56216")
+      (orange-faint    "#e58e5b")
+
+      ;;backgrounds
+      (bg-red-intense     "#990f2d")
+      (bg-green-intense   "#0f9938")
+      (bg-blue-intense    "#0f3d99")
+      (bg-yellow-intense  "#99760f")
+      (bg-magenta-intense "#991e78")
+      (bg-cyan-intense    "#0f8499")
+      (bg-purple-intense  "#4a0f99")
+      (bg-orange-intense  "#99410f")
+
+      (bg-red-subtle      "#660a1e")
+      (bg-green-subtle    "#0a6625")
+      (bg-blue-subtle     "#0a2866")
+      (bg-yellow-subtle   "#664f0a")
+      (bg-magenta-subtle  "#661450")
+      (bg-cyan-subtle     "#0a5866")
+      (bg-purple-subtle   "#310a66")
+      (bg-orange-subtle   "#662b0a")
+
+      (bg-red-nuanced     "#33050f")
+      (bg-green-nuanced   "#053312")
+      (bg-blue-nuanced    "#051433")
+      (bg-yellow-nuanced  "#332705")
+      (bg-magenta-nuanced "#330a28")
+      (bg-cyan-nuanced    "#052c33")
+      (bg-purple-nuanced  "#180533")
+      (bg-orange-nuanced  "#331505")
+
+      (bg-completion       bg-blue-subtle)
+      (bg-hover            bg-cyan-sublte)
+      (bg-hover-secondary  bg-orange-subtle)
+      (bg-hl-line          bg-purple-subtle)
+      (bg-region           gray-light)
+      (fg-region           witheish)
+
+      (bg-char-0 bg-blue-subtle)
+      (bg-char-1 bg-magenta-subtle)
+      (bg-char-2 bg-yellow-subtle)
+
+      (bg-mode-line-active        gray)
+      (fg-mode-line-active        whiteish)
+      (border-mode-line-active    unespecified)
+      (bg-mode-line-inactive      gray-faint)
+      (fg-mode-line-inactive      light-gray)
+      (border-mode-line-inactive  unespecified)
+
+      (modeline-err     red-faint)
+      (modeline-warning yellow-faint)
+      (modeline-info    cyan-faint)
+
+      (bg-tab-bar      gray-faint)
+      (bg-tab-current  bg-main)
+      (bg-tab-other    gray-light)
+
+      ;;mapping
+      (fringe bg-dim)
+      (cursor yellow-faint)
+
+      (keybind blue-faint)
+      (name magenta-faint)
+      (identifier yellow-faint)
+
+      (err red)
+      (warning yellow)
+      (info cyan)
+
+      (underline-err red)
+      (underline-warning yellow)
+      (underline-note cyan)
+
+      ;;headings
+      (fg-heading-0 whiteish)
+      (fg-heading-1 cyan-faint)
+      (fg-heading-2 yellow-faint)
+      (fg-heading-3 blue-faint)
+      (fg-heading-4 magenta-faint)
+      (fg-heading-5 green-faint)
+      (fg-heading-8 purple-faint)
+      (fg-heading-7 orange-faint)
+      (fg-heading-6 red-faint)
+      
+      ;;code
+      (builtin purple)
+      (comment green-faint)
+      (constant blue-faint)
+      (docstring cyan-faint)
+      (docmarkup orange-faint)
+      (fnname purple-faint)
+      (keyword magenta-faint)
+      (preprocessor red-faint)
+      (string green)
+      (type cyan-faint)
+      (variable cyan)
+      (rx-construct green-cooler)
+      (rx-backslash orange)
+       ))
+
+(load-theme 'modus-vivendi-tinted :no-confirm)
+#+end_src
+
+** Background and terminal opacity
+#+begin_src emacs-lisp
+ ;;  (defun set-black-background()
+ ;;    "Make theme's background color black."
+ ;;    (set-face-background 'default "#000000" (selected-frame)))
+
+ ;;  (if (daemonp)
+ ;;    (add-hook 'after-make-frame-functions
+ ;;              (lambda (frame)
+ ;;                ;; (setq doom-modeline-icon t)
+ ;;                (with-selected-frame frame
+ ;;                  (set-black-background))))
+ ;;    (set-black-background))
+
+(defun on-frame-open (&optional frame)
+  "If the FRAME created in terminal don't load background color."
+  (unless (display-graphic-p frame)
+    (set-face-background 'default "unspecified-bg" frame)))
+
+(add-hook 'after-make-frame-functions 'on-frame-open)
+
+(defun on-after-init ()
+  (unless (display-graphic-p (selected-frame))
+    (set-face-background 'default "unspecified-bg" (selected-frame))))
+
+(add-hook 'window-setup-hook 'on-after-init)
+#+end_src
+
+** Font
+#+begin_src emacs-lisp
+  ;;; FONT
+  (defvar efs/default-font-size 120)
+  (defvar efs/default-variable-font-size 120)
+
+  (set-face-attribute 'default nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
+  ;; Set the fixed pitch face
+  (set-face-attribute 'fixed-pitch nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height efs/default-variable-font-size :weight 'regular)
+#+end_src
+
+** Add support for 256colors on ST
+#+begin_src emacs-lisp
+(add-to-list 'term-file-aliases
+    '("st-256color" . "xterm-256color"))
+#+end_src
+
+* Org-mode
+** Font
+#+begin_src emacs-lisp
+  (defun efs/org-font-setup ()
+    "Set faces for heading levels"
+    (dolist (face '((org-level-1 . 1.2)
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.0)
+                    (org-level-6 . 1.0)
+                    (org-level-7 . 1.0)
+                    (org-level-8 . 1.0)))
+      (set-face-attribute (car face) nil :font "SauceCodePro Nerd Font" :weight 'regular :height (cdr face)))
+  
+    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+#+end_src
+
+** Basic setup
+#+begin_src emacs-lisp
+  ;;; ORG-MODE
+  (defun efs/org-mode-setup ()
+    "Set up 'org-mode'."
+    (org-indent-mode)
+    (variable-pitch-mode 1)
+    (visual-line-mode 1))
+
+  (use-package org
+    :pin org
+    :commands (org-capture org-agenda)
+    :hook (org-mode . efs/org-mode-setup)
+    :config
+    (setq org-ellipsis " ▾")
+
+    (setq org-agenda-start-with-log-mode t)
+    (setq org-log-done 'time)
+    (setq org-log-into-drawer t)
+
+    (setq org-agenda-files
+          '("~/notes/tasks.org"
+            "~/notes/archive.org"
+            "~/notes/birthdays.org"
+            ))
+
+    (setq org-refile-targets
+      '(("archive.org" :maxlevel . 1)
+        ("tasks.org" :maxlevel . 1)))
+    (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+    (efs/org-font-setup))
+#+end_src
+
+** Look setup
+#+begin_src emacs-lisp
+  (defun efs/org-mode-visual-fill ()
+    "Center text on 'org-mode'."
+    (setq visual-fill-column-width 100
+          visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
+
+  (use-package org-bullets
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+  (use-package visual-fill-column
+    :hook (org-mode . efs/org-mode-visual-fill))
+
+#+end_src
+
+** code blocks
+#+begin_src emacs-lisp
+  ;; source block
+  (require 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python"))
+  (add-to-list 'org-structure-template-alist '("oc" . "src ocaml"))
+
+  ;; Org babel for code blocks
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((emacs-lisp . t)
+        (ocaml . t)
+        (python . t)))
+
+  (push '("conf-unix" . conf-unix) org-src-lang-modes))
+
+#+end_src
+
+** latex export
+#+begin_src emacs-lisp
+  ;;colors in latex export
+  (require 'ox-latex)
+  (add-to-list 'org-latex-packages-alist '("" "minted"))
+  (setq org-latex-listings 'minted)
+
+  (setq org-latex-pdf-process
+        '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+          "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+          "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+
+#+end_src
+
+* Evilmode vim keys
+#+begin_src emacs-lisp
+  ;;; VIM
+  (use-package evil
+    :demand t
+    :bind (("<escape>" . keyboard-escape-quit))
+    :init
+    ;; allow for using cgn
+    ;; (setq evil-search-module 'evil-search)
+    (setq evil-want-keybinding nil)
+    ;; no vim insert bindings
+    (setq evil-undo-system 'undo-fu)
+    :config
+    (evil-mode t)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-normal-state-map "\C-w\C-h" 'evil-window-left)
+    (define-key evil-normal-state-map "\C-w\C-j" 'evil-window-down)
+    (define-key evil-normal-state-map "\C-w\C-k" 'evil-window-up)
+    (define-key evil-normal-state-map "\C-w\C-l" 'evil-window-right)
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+  (use-package evil-collection
+    :after evil
+    :config
+    (setq evil-want-integration t)
+    (evil-collection-init))
+  ;; Vim style undo
+  (use-package undo-fu)
+  ;; Change cursor terminal
+  (unless (display-graphic-p)
+    (use-package evil-terminal-cursor-changer
+    :config (evil-terminal-cursor-changer-activate)))
+#+end_src
+
+* Code completion and correction
+** lsp
+#+begin_src emacs-lisp
+    ;;lsp
+    (defun efs/lsp-mode-setup ()
+      "Set up lsp mode."
+      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+      (lsp-headerline-breadcrumb-mode))
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+      :hook (lsp-mode . efs/lsp-mode-setup)
+      :bind
+      (:map lsp-mode-map
+            (("M-RET" . lsp-execute-code-action)))
+      :config
+      (lsp-enable-which-key-integration t))
+      (add-hook 'dockerfile-mode-hook #'lsp)
+      (add-hook 'java-mode-hook #'lsp)
+      (add-hook 'python-mode-hook #'lsp)
+      (add-hook 'sql-mode-hook #'lsp)
+      (add-hook 'c-mode-hook #'lsp)
+      (add-hook 'c++-mode-hook #'lsp)
+      (add-hook 'cmake-mode-hook #'lsp)
+      (add-hook 'bash-mode-hook #'lsp)
+      (add-hook 'ocaml-mode-hook #'lsp)
+    (use-package lsp-ui
+      :hook (lsp-mode . lsp-ui-mode)
+      :custom
+      (lsp-ui-doc-position 'bottom))
+
+#+end_src
+
+** flychek
+#+begin_src emacs-lisp
+  ;;flycheck
+  (use-package flycheck
+    :ensure t
+    :init (global-flycheck-mode))
+#+end_src
+
+** company
+#+begin_src emacs-lisp
+  ;;company
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+            ("<tab>" . company-complete-selection))
+          (:map lsp-mode-map
+            ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
+#+end_src
+
+** snippets
+#+begin_src emacs-lisp
+  ;;yasnippet
+    (use-package yasnippet
+      :config (yas-global-mode))
+    (use-package yasnippet-snippets)
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+    (define-key yas-minor-mode-map (kbd "<the new key>") yas-maybe-expand)
+
+  ;; fix yasnippet conflicts
+    (defun company-yasnippet-or-completion ()
+      (interactive)
+      (let ((yas-fallback-behavior nil))
+        (unless (yas-expand)
+          (call-interactively #'company-complete-common))))
+
+    (add-hook 'company-mode-hook (lambda ()
+      (substitute-key-definition 'company-complete-common
+                                 'company-yasnippet-or-completion
+                                 company-active-map)))
+    (add-hook 'flyspell-incorrect-hook
+              #'(lambda (dummy1 dummy2 dymmy3)
+                  (and yas-active-field-overlay
+                       (overlay-buffer yas-active-field-overlay))))
+#+end_src
+
+* Language setup
+** Ocaml
+#+begin_src emacs-lisp
+  ;;Ocaml
+  (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
+  (use-package flycheck-ocaml
+    :config
+    (with-eval-after-load 'merlin
+      ;; Disable Merlin's own error checking
+      (setq merlin-error-after-save nil)
+      ;; Enable Flycheck checker
+      (flycheck-ocaml-setup))
+    (add-hook 'tuareg-mode-hook #'merlin-mode))
+#+end_src
+
+** Java
+#+begin_src emacs-lisp
+  ;;Java
+  (use-package lsp-java
+    :config (add-hook 'java-mode-hook 'lsp))
+  (require 'lsp-java-boot)
+  ;; to enable the lenses
+  (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+  (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+#+end_src
+
+** Python
+#+begin_src emacs-lisp
+  ;;Python
+  (use-package python-mode
+    :ensure t
+    :hook (python-mode . lsp-deferred)
+    :custom
+    ;; NOTE: Set these if Python 3 is called "python3" on your system!
+    ;; (python-shell-interpreter "python3")
+    ;; (dap-python-executable "python3")
+    (dap-python-debugger 'debugpy)
+    :config
+    (require 'dap-python))
+  (use-package pyvenv
+    :after python-mode
+    :config
+    (pyvenv-mode 1))
+#+end_src
+
+** Erlang
+#+begin_src emacs-lisp
+  ;;(setq load-path (cons "/lib/erlang/lib/tools-3.5.2/emacs"
+  ;;load-path))
+  ;;(setq erlang-root-dir "/lib/erlang")
+  ;;(setq exec-path (cons "/lib/erlang/bin" exec-path))
+  ;;(require 'erlang-start)
+  ;;(require 'erlang-flymake)
+#+end_src
+
+* Dired
+** Basic setup
+#+begin_src emacs-lisp
+  ;;;DIRED
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind
+    (("C-x C-j" . dired-jump)
+     ("<backtab>" . dired-subtree-toggle))
+    :custom
+    ((dired-listing-switches "-Aghvol --group-directories-first --time-style=iso")
+    (dired-recursive-copies 'always)
+    (dired-recursive-deletes 'always)
+    (delete-by-moving-to-trash t))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer
+      "P" 'dired-view-file
+      "y" 'dired-ranger-copy
+      "X" 'dired-ranger-move
+      "p" 'dired-ranger-paste))
+#+end_src
+
+** packages
+#+begin_src emacs-lisp
+  (use-package dired-single
+    :defer t)
+
+  (use-package all-the-icons-dired
+    :defer t
+    :hook (dired-mode . all-the-icons-dired-mode))
+
+  (use-package dired-subtree
+    :defer t)
+
+  (use-package dired-ranger
+    :defer t)
+
+  (use-package dired-open
+    :commands (dired dired-jump)
+    :config
+    (setq dired-open-extensions '(("mp4" . "mpv")
+                                  ("mkv" . "mpv")
+                                  ("mov" . "mpv")
+                                  ("jpg" . "eog")
+                                  ("png" . "eog")
+                                  ("jpeg" . "eog")
+                                  ("xlsx" . "libreoffice")
+                                  ("docx" . "libreoffice")
+                                  ("doc" . "libreoffice")
+                                  ("odt" . "libreoffice")
+                                  ("ods" . "libreoffice")
+                                  ("pdf" . "zathura"))))
+
+#+end_src
+
+* Other packages
+** Ivy
+#+begin_src emacs-lisp
+;;ivy
+(use-package ivy
+  :config
+  (ivy-mode t)
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t))
+(use-package ivy-rich
+  :after ivy
+  :init (ivy-rich-mode t))
+(use-package counsel 
+  :config (counsel-mode t))
+(use-package ivy-prescient
+  :after counsel
+  :custom
+  (ivy-prescient-enable-filtering nil)
+  :config
+  (prescient-persist-mode t)
+  (ivy-prescient-mode t))
+(use-package lsp-ivy
+  :after lsp)
+#+end_src
+
+** Projectile
+#+begin_src emacs-lisp
+;;projectile
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy))
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  ;; NOTE: Set this to the folder where you keep your Git repos!
+  ;; (when (file-directory-p "~/")
+  ;; (setq projectile-project-search-path '("~/")))
+  (setq projectile-switch-project-action #'projectile-dired))
+(use-package counsel-projectile
+  :after projectile
+  :config (counsel-projectile-mode))
+#+end_src
+
+** Vterm
+#+begin_src emacs-lisp
+;;vterm
+(use-package vterm
+  :commands vterm
+  :config
+  (setq vterm-shell "zsh")
+  (setq vterm-max-scrollback 10000))
+#+end_src
+
+** Calendar calfw
+#+begin_src emacs-lisp
+;;org-mode calendar
+(use-package calfw-org)
+(setq calendar-week-start-day 1)
+#+end_src
+
+** Magit
+#+begin_src emacs-lisp
+;;magit
+(use-package magit
+  :ensure t)
+#+end_src
+
+** Git-gutter
+#+begin_src emacs-lisp
+;;git-gutter
+(use-package git-gutter
+  :config
+  (setq global-git-gutter-mode t))
+#+end_src
+
+** WhichKey
+#+begin_src emacs-lisp
+;;whichKey
+(use-package which-key
+  :defer 0
+  :diminish which-key-mode
+  :config
+  (which-key-mode)
+  (setq which-key-idle-delay 1))
+#+end_src
+
+** Commenter 
+#+begin_src emacs-lisp
+;;commenting
+(use-package evil-nerd-commenter
+  :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+#+end_src
+
+** Rainbow delimiters
+#+begin_src emacs-lisp
+;;Rainbow delimiters
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** Colorize color names
+#+begin_src emacs-lisp
+;;colorize color names
+(use-package rainbow-mode
+  :config
+  (setq rainbow-ansi-colors nil)
+  (setq rainbow-x-colors nil))
+#+end_src
+
+* Other configs
+#+begin_src emacs-lisp
+  ;; always ask for `y` or `n` instead of `yes` or `no`
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  ;;scrolling
+  (setq redisplay-dont-pause t
+    scroll-margin 1
+    scroll-step 1
+    scroll-conservatively 10000
+    scroll-preserve-screen-position 1)
+
+  ;; set tab to 4
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (setq c-set-style "k&r")
+  (setq c-basic-offset 4)
+
+  ;; autocomplete brackets
+  (electric-pair-mode t)
+
+  ;; set custom
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+
+  ;; backup directorie
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
+      backup-by-copying t    ; Don't delink hardlinks
+      version-control t      ; Use version numbers on backups
+      delete-old-versions t  ; Automatically delete excess backups
+      kept-new-versions 20   ; how many of the newest versions to keep
+      kept-old-versions 5    ; and how many of the old
+      )
+
+  ;; open a browser and search
+  (defun search (url)
+    "Opens a browser and search URL DuckDuckGo for the given string."
+    (interactive "sSearch for: ")
+    (browse-url (concat "http://www.duckduckgo.com/?q="
+                        (url-hexify-string url))))
+
+  ;;redefine dired-find-file to open on custom program
+  (define-key dired-mode-map [remap dired-find-file] 'dired-open-file)
+
+  ;;set line numbers to relative
+  (setq display-line-numbers 'relative)
+#+end_src
