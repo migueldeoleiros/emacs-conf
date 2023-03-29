@@ -1,0 +1,12 @@
+* Emacs Config
+This repo contains my configuration for the Emacs text editor.
+It's saved as an org file ([[https://github.com/migueldeoleiros/emacs-conf/blob/master/emacsConf.org][emacsConf.org]])
+
+In order to make use of it you need to compile the code into a file, you can do so with the next command:
+#+begin_src elisp
+org-babel-tangle
+#+end_src
+
+The advantages of storing the config this way is that you can make use of the org-mode organization in your code, you could have code for different files or languages all in one place and also add documentation to the same file (although I'm failing a bit in that regard)
+
+To navigate the config you can make use of the GitHub UI, it gives you a table of content in the top left as a hamburger menu.
