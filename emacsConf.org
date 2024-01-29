@@ -27,6 +27,7 @@
 #+begin_src emacs-lisp 
   ;;; BOOTSTRAP USE-PACKAGES
   (package-initialize)
+  (require 'use-package-ensure)
   (setq use-package-always-ensure t)
   (unless (package-installed-p 'use-package)
       (package-refresh-contents)
@@ -56,10 +57,10 @@
     :defer t
     :init (add-hook 'text-mode-hook #'guess-language-mode)
     :config
-    (setq guess-language-langcodes '((en . ("en_US" "English"))
-                                     (pt . ("pt_PT" "Portuguese"))
-                                     (es . ("es_ES" "Spanish")))
-          guess-language-languages '(en es)
+    (setq guess-language-langcodes '((en . ("en_US" "English" "🇺🇸" "American"))
+                                     (pt . ("pt_PT" "Portuguese" "🇵🇹" "Portuguese"))
+                                     (es . ("es_ES" "Spanish" "🇪🇸" "Spanish")))
+          guess-language-languages '(en es pt)
           guess-language-min-paragraph-length 45)
     :diminish guess-language-mode)
 #+end_src
@@ -74,7 +75,6 @@
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
       :global-prefix "M-SPC")
-
     (efs/leader-keys
       "n" '((lambda() (interactive)(find-file "~/notes/tasks.org")) :which-key "org file with tasks")
       "C-s" '((lambda() (interactive)(set-input-method "spanish-prefix")) :which-key "change input method to spanish")
@@ -141,12 +141,14 @@
 #+begin_src emacs-lisp
   ;;; THEME
   ;; Customizations prior to loading the themes
+  (require 'modus-themes)
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
         modus-themes-variable-pitch-ui t
         modus-themes-org-blocks 'gray-background)
 
+  (require 'modus-vivendi-tinted-theme)
   (setq modus-vivendi-tinted-palette-overrides
         '(
         (bg-main          "#090a11")
@@ -320,13 +322,14 @@
  ;;    (set-black-background))
 
 (defun on-frame-open (&optional frame)
-  "If the FRAME created in terminal don't load background color."
+  "If the FRAME is created in a terminal don't load background color."
   (unless (display-graphic-p frame)
     (set-face-background 'default "unspecified-bg" frame)))
 
 (add-hook 'after-make-frame-functions 'on-frame-open)
 
 (defun on-after-init ()
+  "If the selected FRAME is in a terminal don't load background color."
   (unless (display-graphic-p (selected-frame))
     (set-face-background 'default "unspecified-bg" (selected-frame))))
 
@@ -356,7 +359,7 @@
 ** Font
 #+begin_src emacs-lisp
   (defun efs/org-font-setup ()
-    "Set faces for heading levels"
+    "Set faces for `org-mode' heading levels."
     (dolist (face '((org-level-1 . 1.2)
                     (org-level-2 . 1.1)
                     (org-level-3 . 1.05)
@@ -384,8 +387,9 @@
 ** Basic setup
 #+begin_src emacs-lisp
   ;;; ORG-MODE
+  (require 'org)
   (defun efs/org-mode-setup ()
-    "Set up 'org-mode'."
+    "Set up `org-mode'."
     (org-indent-mode)
     (variable-pitch-mode 1)
     (visual-line-mode 1))
@@ -417,9 +421,10 @@
 
 ** Look setup
 #+begin_src emacs-lisp
+  (require 'visual-fill-column)
   (defun efs/org-mode-visual-fill ()
-    "Center text on 'org-mode'."
-    (setq visual-fill-column-width 100
+    "Center text on `org-mode'."
+    (setq visual-fill-column-width 120
           visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
@@ -430,7 +435,6 @@
 
   (use-package visual-fill-column
     :hook (org-mode . efs/org-mode-visual-fill))
-
 #+end_src
 
 ** code blocks
@@ -451,7 +455,6 @@
         (python . t)))
 
   (push '("conf-unix" . conf-unix) org-src-lang-modes))
-
 #+end_src
 
 ** latex export
@@ -459,7 +462,7 @@
   ;;colors in latex export
   (require 'ox-latex)
   (add-to-list 'org-latex-packages-alist '("" "minted"))
-  (setq org-latex-listings 'minted)
+  (setq org-latex-src-block-backend 'minted)
 
   (setq org-latex-pdf-process
         '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
@@ -489,13 +492,16 @@
     (define-key evil-normal-state-map "\C-w\C-l" 'evil-window-right)
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
+
   (use-package evil-collection
     :after evil
     :config
     (setq evil-want-integration t)
     (evil-collection-init))
+
   ;; Vim style undo
   (use-package undo-fu)
+
   ;; Change cursor terminal
   (unless (display-graphic-p)
     (use-package evil-terminal-cursor-changer
@@ -503,35 +509,41 @@
 #+end_src
 
 * Code completion and correction
+#+begin_src emacs-lisp
+  ;;; Code Completion and correction
+#+end_src>
 ** lsp
 #+begin_src emacs-lisp
-    ;;lsp
-    (defun efs/lsp-mode-setup ()
-      "Set up lsp mode."
-      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-      (lsp-headerline-breadcrumb-mode))
-    (use-package lsp-mode
-      :commands (lsp lsp-deferred)
-      :hook (lsp-mode . efs/lsp-mode-setup)
-      :bind
-      (:map lsp-mode-map
-            (("M-RET" . lsp-execute-code-action)))
-      :config
-      (lsp-enable-which-key-integration t))
-      (add-hook 'dockerfile-mode-hook #'lsp)
-      (add-hook 'java-mode-hook #'lsp)
-      (add-hook 'python-mode-hook #'lsp)
-      (add-hook 'sql-mode-hook #'lsp)
-      (add-hook 'c-mode-hook #'lsp)
-      (add-hook 'c++-mode-hook #'lsp)
-      (add-hook 'cmake-mode-hook #'lsp)
-      (add-hook 'bash-mode-hook #'lsp)
-      (add-hook 'ocaml-mode-hook #'lsp)
-    (use-package lsp-ui
-      :hook (lsp-mode . lsp-ui-mode)
-      :custom
-      (lsp-ui-doc-position 'bottom))
+  ;;lsp
+  (require 'lsp)
+  (require 'lsp-headerline)
+  (defun efs/lsp-mode-setup ()
+    "Set up lsp mode."
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :hook (lsp-mode . efs/lsp-mode-setup)
+    :bind
+    (:map lsp-mode-map
+          (("M-RET" . lsp-execute-code-action)))
+    :config
+    (lsp-enable-which-key-integration t))
+    (add-hook 'dockerfile-mode-hook #'lsp)
+    (add-hook 'java-mode-hook #'lsp)
+    (add-hook 'python-mode-hook #'lsp)
+    (add-hook 'sql-mode-hook #'lsp)
+    (add-hook 'c-mode-hook #'lsp)
+    (add-hook 'c++-mode-hook #'lsp)
+    (add-hook 'cmake-mode-hook #'lsp)
+    (add-hook 'bash-mode-hook #'lsp)
+    (add-hook 'ocaml-mode-hook #'lsp)
+
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 #+end_src
 
 ** flychek
@@ -562,31 +574,29 @@
 ** snippets
 #+begin_src emacs-lisp
   ;;yasnippet
-    (use-package yasnippet
-      :config (yas-global-mode))
-    (use-package yasnippet-snippets)
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
-    (define-key yas-minor-mode-map (kbd "<the new key>") yas-maybe-expand)
+  (use-package yasnippet
+    :config (yas-global-mode))
+  (use-package yasnippet-snippets)
 
   ;; fix yasnippet conflicts
-    (defun company-yasnippet-or-completion ()
-      (interactive)
-      (let ((yas-fallback-behavior nil))
-        (unless (yas-expand)
-          (call-interactively #'company-complete-common))))
+  (require 'company)
+  (defun company-yasnippet-or-completion ()
+    "Use Yasnippet or fall back to company completion."
+    (interactive)
+    (unless (yas-maybe-expand-abbrev-key-filter 'yas-triggers-in-field)
+      (call-interactively #'company-complete-common)))
 
-    (add-hook 'company-mode-hook (lambda ()
-      (substitute-key-definition 'company-complete-common
-                                 'company-yasnippet-or-completion
-                                 company-active-map)))
-    (add-hook 'flyspell-incorrect-hook
-              #'(lambda (dummy1 dummy2 dymmy3)
-                  (and yas-active-field-overlay
-                       (overlay-buffer yas-active-field-overlay))))
+  (add-hook 'company-mode-hook
+            (lambda ()
+              (substitute-key-definition 'company-complete-common
+                                         'company-yasnippet-or-completion
+                                          company-active-map)))
 #+end_src
 
 * Language setup
+#+begin_src emacs-lisp
+  ;;; Language specific configurations 
+#+end_src>
 ** Ocaml
 #+begin_src emacs-lisp
   ;;Ocaml
@@ -633,6 +643,7 @@
 
 ** Erlang
 #+begin_src emacs-lisp
+  ;;Erlang
   ;;(setq load-path (cons "/lib/erlang/lib/tools-3.5.2/emacs"
   ;;load-path))
   ;;(setq erlang-root-dir "/lib/erlang")
@@ -695,52 +706,59 @@
                                   ("doc" . "libreoffice")
                                   ("odt" . "libreoffice")
                                   ("ods" . "libreoffice")
-                                  ("pdf" . "zathura"))))
-
+                                  ("pdf" . "evince"))))
 #+end_src
 
 * Other packages
+#+begin_src emacs-lisp
+  ;;; Other packages
+#+end_src>
 ** Ivy
 #+begin_src emacs-lisp
-;;ivy
-(use-package ivy
-  :config
-  (ivy-mode t)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t))
-(use-package ivy-rich
-  :after ivy
-  :init (ivy-rich-mode t))
-(use-package counsel 
-  :config (counsel-mode t))
-(use-package ivy-prescient
-  :after counsel
-  :custom
-  (ivy-prescient-enable-filtering nil)
-  :config
-  (prescient-persist-mode t)
-  (ivy-prescient-mode t))
-(use-package lsp-ivy
-  :after lsp)
+  ;;ivy
+  (use-package ivy
+    :config
+    (ivy-mode t)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t))
+
+  (use-package ivy-rich
+    :after ivy
+    :init (ivy-rich-mode t))
+
+  (use-package counsel
+    :config (counsel-mode t))
+
+  (use-package ivy-prescient
+    :after counsel
+    :custom
+    (ivy-prescient-enable-filtering nil)
+    :config
+    (prescient-persist-mode t)
+    (ivy-prescient-mode t))
+
+  (use-package lsp-ivy
+    :after lsp)
 #+end_src
 
 ** Projectile
 #+begin_src emacs-lisp
-;;projectile
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  ;; (when (file-directory-p "~/")
-  ;; (setq projectile-project-search-path '("~/")))
-  (setq projectile-switch-project-action #'projectile-dired))
-(use-package counsel-projectile
-  :after projectile
-  :config (counsel-projectile-mode))
+  ;;projectile
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    ;; (when (file-directory-p "~/")
+    ;; (setq projectile-project-search-path '("~/")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile
+    :after projectile
+    :config (counsel-projectile-mode))
 #+end_src
 
 ** Vterm
@@ -811,21 +829,24 @@
 
 * Other configs
 #+begin_src emacs-lisp
+  ;;; Other configurations
+
   ;; always ask for `y` or `n` instead of `yes` or `no`
   (defalias 'yes-or-no-p 'y-or-n-p)
 
   ;;scrolling
-  (setq redisplay-dont-pause t
-    scroll-margin 1
-    scroll-step 1
-    scroll-conservatively 10000
-    scroll-preserve-screen-position 1)
+  (setq scroll-margin 1
+        scroll-step 1
+        scroll-conservatively 10000
+        scroll-preserve-screen-position 1)
 
-  ;; set tab to 4
+  ;; set tab to 4 spaces
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 4)
-  (setq c-set-style "k&r")
-  (setq c-basic-offset 4)
+  (setq indent-line-function 'insert-tab)
+  (setq c-default-style "linux")
+  (setq c-basic-offset 4) 
+  (c-set-offset 'comment-intro 0)
 
   ;; autocomplete brackets
   (electric-pair-mode t)
