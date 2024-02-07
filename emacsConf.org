@@ -538,6 +538,7 @@
     (add-hook 'c++-mode-hook #'lsp)
     (add-hook 'cmake-mode-hook #'lsp)
     (add-hook 'bash-mode-hook #'lsp)
+    (add-hook 'web-mode-hook #'lsp)
     (add-hook 'ocaml-mode-hook #'lsp)
 
   (use-package lsp-ui
@@ -650,6 +651,28 @@
   ;;(setq exec-path (cons "/lib/erlang/bin" exec-path))
   ;;(require 'erlang-start)
   ;;(require 'erlang-flymake)
+#+end_src
+
+** Web dev
+#+begin_src emacs-lisp
+  ;;html-js
+  (use-package web-mode
+    :mode
+    (".twig$"
+     ".html?$"
+     ".hbs$"
+     ".vue$"
+     ".blade.php$")
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-style-padding 2
+          web-mode-script-padding 2
+          web-mode-enable-auto-closing t
+          web-mode-enable-auto-opening t
+          web-mode-enable-auto-pairing t
+          web-mode-enable-auto-indentation t))
 #+end_src
 
 * Dired
