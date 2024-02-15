@@ -140,7 +140,7 @@
 #+begin_src emacs-lisp
   ;;; THEME
   ;; Customizations prior to loading the themes
-  (require 'modus-themes)
+  (use-package modus-themes)
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
@@ -420,7 +420,7 @@
 
 ** Look setup
 #+begin_src emacs-lisp
-  (require 'visual-fill-column)
+  (use-package visual-fill-column)
   (defun efs/org-mode-visual-fill ()
     "Center text on `org-mode'."
     (setq visual-fill-column-width 120
@@ -514,13 +514,6 @@
 ** lsp
 #+begin_src emacs-lisp
   ;;lsp
-  (require 'lsp)
-  (require 'lsp-headerline)
-  (defun efs/lsp-mode-setup ()
-    "Set up lsp mode."
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
-
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
     :hook (lsp-mode . efs/lsp-mode-setup)
@@ -540,6 +533,11 @@
     (add-hook 'web-mode-hook #'lsp)
     (add-hook 'dart-mode-hook #'lsp)
     (add-hook 'ocaml-mode-hook #'lsp)
+
+  (defun efs/lsp-mode-setup ()
+    "Set up lsp mode."
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
@@ -686,6 +684,9 @@
   (use-package lsp-dart
     :after dart-mode
     :config (setq lsp-dart-dap-flutter-hot-reload-on-save  t))
+
+  (setq gc-cons-threshold (* 100 1024 1024)
+        read-process-output-max (* 1024 1024))
 #+end_src
 
 * Dired
