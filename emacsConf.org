@@ -689,6 +689,18 @@
         read-process-output-max (* 1024 1024))
 #+end_src
 
+** Nix
+#+begin_src emacs-lisp
+  ;;Nix
+  (use-package nix-mode)
+#+end_src
+
+** Meson
+#+begin_src emacs-lisp
+  ;;Meson
+  (use-package meson-mode)
+#+end_src
+
 * Dired
 ** Basic setup
 #+begin_src emacs-lisp
