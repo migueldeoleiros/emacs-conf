@@ -702,60 +702,60 @@
 #+end_src
 
 * Dired
-** Basic setup
 #+begin_src emacs-lisp
   ;;;DIRED
-  (use-package dired
-    :ensure nil
-    :commands (dired dired-jump)
-    :bind
-    (("C-x C-j" . dired-jump)
-     ("<backtab>" . dired-subtree-toggle))
+  (use-package pdf-tools)
+  (use-package dired-single :defer t)
+  (use-package dired-ranger :defer t)
+  (use-package dirvish
+    :init
+    (dirvish-override-dired-mode)
     :custom
-    ((dired-listing-switches "-Aghvol --group-directories-first --time-style=iso")
-    (dired-recursive-copies 'always)
-    (dired-recursive-deletes 'always)
-    (delete-by-moving-to-trash t))
+    (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+     '(("h" "~/"                          "Home")
+       ("d" "~/downloads/"                "Downloads")
+       ("u" "/universidad/"               "Universidad")
+       ("t" "~/.local/share/Trash/files/" "TrashCan")))
     :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-single-up-directory
-      "l" 'dired-single-buffer
-      "P" 'dired-view-file
-      "y" 'dired-ranger-copy
-      "X" 'dired-ranger-move
-      "p" 'dired-ranger-paste))
-#+end_src
-
-** packages
-#+begin_src emacs-lisp
-  (use-package dired-single
-    :defer t)
-
-  (use-package all-the-icons-dired
-    :defer t
-    :hook (dired-mode . all-the-icons-dired-mode))
-
-  (use-package dired-subtree
-    :defer t)
-
-  (use-package dired-ranger
-    :defer t)
-
-  (use-package dired-open
-    :commands (dired dired-jump)
-    :config
-    (setq dired-open-extensions '(("mp4" . "mpv")
-                                  ("mkv" . "mpv")
-                                  ("mov" . "mpv")
-                                  ("jpg" . "eog")
-                                  ("png" . "eog")
-                                  ("jpeg" . "eog")
-                                  ("xlsx" . "libreoffice")
-                                  ("docx" . "libreoffice")
-                                  ("doc" . "libreoffice")
-                                  ("odt" . "libreoffice")
-                                  ("ods" . "libreoffice")
-                                  ("pdf" . "evince"))))
+    ;; (dirvish-peek-mode) ; Preview files in minibuffer
+    ;; (dirvish-side-follow-mode) ; similar to `treemacs-follow-mode'
+    (evil-make-overriding-map dirvish-mode-map 'normal)
+    (setq dirvish-reuse-session t)
+    (setq dired-mouse-drag-files t)
+    (setq mouse-drag-and-drop-region-cross-program t)
+    (setq dirvish-mode-line-format
+          '(:left (sort symlink) :right (omit yank index)))
+    (setq dirvish-attributes
+          '(all-the-icons file-size collapse subtree-state vc-state git-msg))
+    (setq delete-by-moving-to-trash t)
+    (setq dired-listing-switches
+          "-l --almost-all --human-readable --group-directories-first --no-group")
+    (setq dirvish-open-with-programs 
+      (append dirvish-open-with-programs '(
+        (("xlsx" "docx" "doc" "odt" "ods") "libreoffice" "%f")
+        (("jpg" "jpeg" "png")              "eog" "%f")
+        (("pdf")                           "evince" "%f"))))
+    :bind ; Bind `dirvish|dirvish-side|dirvish-dwim' as you see fit
+    (("C-c f" . dirvish-fd)
+     :map dirvish-mode-map ; Dirvish inherits `dired-mode-map'
+     ("h"   . dired-single-up-directory)
+     ("j"   . dired-next-line)
+     ("k"   . dired-previous-line)
+     ("l"   . dired-single-buffer)
+     ("q"   . dirvish-quit)
+     ("f"   . dirvish-file-info-menu)
+     ("y"   . dirvish-yank-menu)
+     ("N"   . dirvish-narrow)
+     ("y"   . dired-ranger-copy)
+     ("X"   . dired-ranger-move)
+     ("p"   . dired-ranger-paste)
+     ("TAB" . dirvish-subtree-toggle)
+     ("C-a" . dirvish-quick-access)
+     ("C-f" . dirvish-fd-jump)
+     ("C-c t" . dirvish-layout-toggle)
+     ("C-c d" . make-directory)
+     ("C-c m" . dirvish-mark-menu)
+     ("M-c e" . dirvish-emerge-menu)))
 #+end_src
 
 * Other packages
@@ -882,10 +882,6 @@
 
     (use-package treemacs-projectile
       :after (treemacs projectile)
-      :ensure t)
-
-    (use-package treemacs-icons-dired
-      :hook (dired-mode . treemacs-icons-dired-enable-once)
       :ensure t)
 
     (use-package treemacs-magit
