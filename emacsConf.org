@@ -956,6 +956,21 @@
   (setq rainbow-x-colors nil))
 #+end_src
 
+** WakaTime
+#+begin_src emacs-lisp
+;;WakaTime
+(use-package wakatime-mode)
+#+end_src
+
+** undo-tree
+#+begin_src emacs-lisp
+;;undo-tree
+(use-package undo-tree)
+(global-undo-tree-mode)
+(setq undo-tree-auto-save-history t)
+(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+#+end_src
+
 * Other configs
 #+begin_src emacs-lisp
   ;;; Other configurations
