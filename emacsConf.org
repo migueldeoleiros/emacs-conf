@@ -320,6 +320,10 @@
  ;;                  (set-black-background))))
  ;;    (set-black-background))
 
+;; Transparent background on GUI
+(set-frame-parameter nil 'alpha-background 80)
+(add-to-list 'default-frame-alist '(alpha-background . 80))
+
 (defun on-frame-open (&optional frame)
   "If the FRAME is created in a terminal don't load background color."
   (unless (display-graphic-p frame)
@@ -497,9 +501,6 @@
     :config
     (setq evil-want-integration t)
     (evil-collection-init))
-
-  ;; Vim style undo
-  (use-package undo-fu)
 
   ;; Change cursor terminal
   (unless (display-graphic-p)
@@ -962,13 +963,18 @@
 (use-package wakatime-mode)
 #+end_src
 
-** undo-tree
+** undo-fu
 #+begin_src emacs-lisp
-;;undo-tree
-(use-package undo-tree)
-(global-undo-tree-mode)
-(setq undo-tree-auto-save-history t)
-(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+  ;; Better undo
+  (use-package undo-fu)
+  (use-package undo-fu-session
+    :config
+    (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+  (undo-fu-session-global-mode)
+  (setq undo-fu-session-directory "~/.emacs.d/undo-history")
+
+  ;;undo-tree
+  (use-package vundo)
 #+end_src
 
 * Other configs
