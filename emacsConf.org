@@ -108,14 +108,8 @@
   (setq visible-bell t)
 
   (column-number-mode)
+  (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode t)
-
-  ;; Set frame transparency
-  ;; (defvar efs/frame-transparency '(80 . 80))
-  ;; (set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-  ;; (add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-  ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
@@ -917,10 +911,12 @@
 
 ** Git-gutter
 #+begin_src emacs-lisp
-;;git-gutter
-(use-package git-gutter
-  :config
-  (setq global-git-gutter-mode t))
+  ;;git-gutter
+  (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode)
+    :config
+    (setq git-gutter:update-interval 0.02))
+
 #+end_src
 
 ** WhichKey
@@ -938,7 +934,7 @@
 #+begin_src emacs-lisp
 ;;commenting
 (use-package evil-nerd-commenter
-  :bind ("M-/" . evilnc-comment-or-uncomment-lines))
+  :bind ("C-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 
 ** Rainbow delimiters
@@ -977,6 +973,14 @@
   (use-package vundo)
 #+end_src
 
+** Zoom
+#+begin_src emacs-lisp
+  ;; Resize splits 
+  (use-package zoom
+    :ensure t
+    :init (zoom-mode t))
+#+end_src
+
 * Other configs
 #+begin_src emacs-lisp
   ;;; Other configurations
@@ -985,7 +989,7 @@
   (defalias 'yes-or-no-p 'y-or-n-p)
 
   ;;scrolling
-  (setq scroll-margin 1
+  (setq scroll-margin 8
         scroll-step 1
         scroll-conservatively 10000
         scroll-preserve-screen-position 1)
@@ -1023,7 +1027,4 @@
 
   ;;redefine dired-find-file to open on custom program
   (define-key dired-mode-map [remap dired-find-file] 'dired-open-file)
-
-  ;;set line numbers to relative
-  (setq display-line-numbers 'relative)
 #+end_src
