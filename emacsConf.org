@@ -111,6 +111,16 @@
   (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode t)
 
+  ;; padding
+  (use-package spacious-padding
+    :config (spacious-padding-mode 1))
+  (defun bs-sp-workaround ()
+    "Workaround issues with `spacious-padding-mode' when using emacsclient."
+    (when server-mode
+      (spacious-padding-mode 1)
+      (remove-hook 'server-after-make-frame-hook #'bs-sp-workaround)))
+  (add-hook 'server-after-make-frame-hook #'bs-sp-workaround)
+  
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
                   cfw:calendar-mode-hook
@@ -315,9 +325,9 @@
  ;;    (set-black-background))
 
 ;; Transparent background on GUI
-(set-frame-parameter nil 'alpha-background 80)
-(add-to-list 'default-frame-alist '(alpha-background . 80))
-
+;; (set-frame-parameter nil 'alpha-background 80)
+;; (add-to-list 'default-frame-alist '(alpha-background . 80))
+ 
 (defun on-frame-open (&optional frame)
   "If the FRAME is created in a terminal don't load background color."
   (unless (display-graphic-p frame)
