@@ -154,20 +154,20 @@
   (require 'modus-vivendi-tinted-theme)
   (setq modus-vivendi-tinted-palette-overrides
         '(
-        (bg-main          "#090a11")
-        (bg-dim           "#121319")
+        (bg-main          "#0f0f0f")
+        (bg-dim           "#191919")
         (fg-main          "#ffffff")
-        (fg-dim           "#aeb3bf")
-        (fg-alt           "#d3dae8")
-        (bg-active        "#414259")
-        (bg-inactive      "#252633")
-        (border           "#252633")
+        (fg-dim           "#b9b9b9")
+        (fg-alt           "#e0e0e0")
+        (bg-active        "#4b4b4b")
+        (bg-inactive      "#2d2d2d")
+        (border           "#2d2d2d")
 
-        (gray            "#121319")
-        (gray-faint      "#252633")
-        (gray-light      "#414259")
-        (whiteish        "#d3dae8")
-        (light-gray      "#aeb3bf")
+        (gray            "#191919")
+        (gray-faint      "#2d2d2d")
+        (gray-light      "#4b4b4b")
+        (whiteish        "#e0e0e0")
+        (light-gray      "#b9b9b9")
 
         (red             "#d1143d")
         (red-faint       "#d1536e")
@@ -989,6 +989,14 @@
   (use-package zoom
     :ensure t
     :init (zoom-mode t))
+#+end_src
+
+** Solaire mode
+#+begin_src emacs-lisp
+  ;; Solaire mode 
+  (use-package solaire-mode
+    :ensure t
+    :init (solaire-global-mode t))
 #+end_src
 
 * Other configs
