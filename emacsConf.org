@@ -450,6 +450,7 @@
   (require 'org-tempo)
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("calc" . "src calc"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
   (add-to-list 'org-structure-template-alist '("oc" . "src ocaml"))
 
@@ -458,6 +459,8 @@
     (org-babel-do-load-languages
         'org-babel-load-languages
         '((emacs-lisp . t)
+        (shell . t)
+        (calc . t)
         (ocaml . t)
         (python . t)))
 
@@ -739,7 +742,7 @@
       (append dirvish-open-with-programs '(
         (("xlsx" "docx" "doc" "odt" "ods") "libreoffice" "%f")
         (("jpg" "jpeg" "png")              "eog" "%f")
-        (("pdf")                           "evince" "%f"))))
+        (("pdf")                           "zathura" "%f"))))
     :bind ; Bind `dirvish|dirvish-side|dirvish-dwim' as you see fit
     (("C-c f" . dirvish-fd)
      :map dirvish-mode-map ; Dirvish inherits `dired-mode-map'
