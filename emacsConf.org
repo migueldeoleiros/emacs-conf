@@ -723,6 +723,7 @@
      '(("h" "~/"                          "Home")
        ("d" "~/downloads/"                "Downloads")
        ("u" "/universidad/"               "Universidad")
+       ("i" "/igalia/"                    "Igalia")
        ("t" "~/.local/share/Trash/files/" "TrashCan")))
     :config
     ;; (dirvish-peek-mode) ; Preview files in minibuffer
@@ -734,7 +735,7 @@
     (setq dirvish-mode-line-format
           '(:left (sort symlink) :right (omit yank index)))
     (setq dirvish-attributes
-          '(all-the-icons file-size collapse subtree-state vc-state git-msg))
+          '(all-the-icons file-size collapse subtree-state))
     (setq delete-by-moving-to-trash t)
     (setq dired-listing-switches
           "-l --almost-all --human-readable --group-directories-first --no-group")
