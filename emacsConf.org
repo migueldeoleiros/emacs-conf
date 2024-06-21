@@ -425,6 +425,37 @@
     (efs/org-font-setup))
 #+end_src
 
+** org-roam
+#+begin_src emacs-lisp
+  ;;org-roam
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (file-truename "~/notes/RoamNotes"))
+    (org-roam-completion-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain
+        "\n- tags :: %?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n g" . org-roam-ui-open)
+           ("C-c n c" . org-roam-capture))
+    :bind-keymap ("C-c j" . org-roam-dailies-map)
+    :config
+    (setq org-roam-node-display-template
+          (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)
+    (require 'org-roam-dailies)
+    (setq org-roam-dailies-directory "journal/")
+    (require 'org-roam-protocol))
+  (use-package org-roam-ui
+    :ensure t
+    :after org-roam)
+#+end_src
+
 ** Look setup
 #+begin_src emacs-lisp
   (use-package visual-fill-column)
