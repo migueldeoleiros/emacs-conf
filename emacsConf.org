@@ -445,15 +445,27 @@
            ("C-c n c" . org-roam-capture))
     :bind-keymap ("C-c j" . org-roam-dailies-map)
     :config
+    (add-to-list 'display-buffer-alist
+                 '("\\*org-roam\\*"
+                   (display-buffer-in-direction)
+                   (direction . right)
+                   (window-width . 0.33)
+                   (window-height . fit-window-to-buffer)))
     (setq org-roam-node-display-template
           (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
     (org-roam-db-autosync-mode)
     (require 'org-roam-dailies)
     (setq org-roam-dailies-directory "journal/")
+    (require 'org-roam-export)
     (require 'org-roam-protocol))
   (use-package org-roam-ui
     :ensure t
-    :after org-roam)
+    :after org-roam
+    :custom
+    (org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "\n- tags :: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n\n %?"
+           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
 #+end_src
 
 ** Look setup
