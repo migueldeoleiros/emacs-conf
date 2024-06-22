@@ -407,6 +407,8 @@
     :config
     (setq org-ellipsis " ▾")
 
+    (setq org-return-follows-link t)
+
     (setq org-agenda-start-with-log-mode t)
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
@@ -542,6 +544,8 @@
     (define-key evil-normal-state-map "\C-w\C-j" 'evil-window-down)
     (define-key evil-normal-state-map "\C-w\C-k" 'evil-window-up)
     (define-key evil-normal-state-map "\C-w\C-l" 'evil-window-right)
+    (define-key evil-motion-state-map (kbd "SPC") nil)
+    (define-key evil-motion-state-map (kbd "RET") nil)
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
 
