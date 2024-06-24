@@ -111,6 +111,10 @@
   (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode t)
 
+  ;; Split to the side by default
+  (setq split-width-threshold 0)
+  (setq split-height-threshold nil)
+
   ;; padding
   ;; (use-package spacious-padding
   ;;   :config (spacious-padding-mode 1))
