@@ -457,21 +457,18 @@
                    (direction . right)
                    (window-width . 0.33)
                    (window-height . fit-window-to-buffer)))
-    (setq org-roam-node-display-template
-          (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    (org-roam-db-autosync-mode)
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag))) (org-roam-db-autosync-mode)
     (require 'org-roam-dailies)
     (setq org-roam-dailies-directory "journal/")
+    (setq org-roam-dailies-capture-templates
+          '(("d" "default" entry "%?"
+             :target (file+head "%<%Y-%m-%d>.org"
+                                "#+title: %<%Y-%m-%d>\n#+filetags: journal\n \n- tags :: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n "))))
     (require 'org-roam-export)
     (require 'org-roam-protocol))
   (use-package org-roam-ui
     :ensure t
-    :after org-roam
-    :custom
-    (org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           "\n- tags :: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n\n %?"
-           :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n")))))
+    :after org-roam)
 #+end_src
 
 ** Look setup
