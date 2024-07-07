@@ -2,6 +2,9 @@
 #+PROPERTY: header-args:emacs-lisp :tangle init.el :mkdirp yes
 
 * Start up
+#+begin_src emacs-lisp
+  ;; -*- lexical-binding: t; -*-
+#+end_src
 ** Garbage collection
 #+begin_src emacs-lisp 
   ;; Minimize garbage collection during startup
@@ -417,15 +420,8 @@
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
 
-    (setq org-agenda-files
-          '("~/notes/tasks.org"
-            "~/notes/archive.org"
-            "~/notes/birthdays.org"
-            ))
-
     (setq org-refile-targets
-      '(("archive.org" :maxlevel . 1)
-        ("tasks.org" :maxlevel . 1)))
+      '(("~/notes/20240707172055-archive.org" :maxlevel . 1)))
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
     (efs/org-font-setup))
@@ -437,7 +433,7 @@
   (use-package org-roam
     :ensure t
     :custom
-    (org-roam-directory (file-truename "~/notes/RoamNotes"))
+    (org-roam-directory (file-truename "~/notes"))
     (org-roam-completion-everywhere t)
     (org-roam-capture-templates
      '(("d" "default" plain
@@ -469,6 +465,48 @@
   (use-package org-roam-ui
     :ensure t
     :after org-roam)
+
+  (require 'org-roam)
+  (defun my/org-roam-filter-by-tag (tag-name)
+    (lambda (node)
+      (member tag-name (org-roam-node-tags node))))
+
+  (defun my/org-roam-list-notes-by-tag (tag-name)
+    (mapcar #'org-roam-node-file
+            (seq-filter
+             (my/org-roam-filter-by-tag tag-name)
+             (org-roam-node-list))))
+
+  (defun my/org-roam-refresh-agenda-list ()
+    (interactive)
+    (setq org-agenda-files (my/org-roam-list-notes-by-tag "tasks")))
+
+  ;; Build the agenda list the first time for the session
+  (my/org-roam-refresh-agenda-list)
+
+  (defun my/org-roam-project-finalize-hook ()
+    "Adds the captured project file to `org-agenda-files' if the
+  capture was not aborted."
+    ;; Remove the hook since it was added temporarily
+    (remove-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+    ;; Add project file to the agenda list if the capture was confirmed
+    (unless org-note-abort
+      (with-current-buffer (org-capture-get :buffer)
+        (add-to-list 'org-agenda-files (buffer-file-name)))))
+
+  (defun my/org-roam-find-project ()
+    (interactive)
+    ;; Add the project file to the agenda after capture is finished
+    (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+  
+    ;; Select a project file to open, creating it if necessary
+    (org-roam-node-find
+     nil
+     nil
+     (my/org-roam-filter-by-tag "tasks")))
+  
+  (global-set-key (kbd "C-c n t") #'my/org-roam-find-project)
 #+end_src
 
 ** Look setup
