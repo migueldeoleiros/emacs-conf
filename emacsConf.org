@@ -423,6 +423,13 @@
     (setq org-todo-keywords
       '((sequence "TODO(t)" "PROG(p)" "DONE(d)")))
 
+    (setq org-agenda-custom-commands
+      '(("n" "Custom Agenda with TODOs"
+         ((agenda "")
+          (todo "PROG")
+          (todo "TODO")
+         ))))
+
     (setq org-return-follows-link t)
 
     (setq org-agenda-span 10)
@@ -443,7 +450,7 @@
     :config
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys))
-    #+end_src
+#+end_src
 
 ** org-roam
 #+begin_src emacs-lisp
