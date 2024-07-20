@@ -66,6 +66,12 @@
           guess-language-languages '(en es pt)
           guess-language-min-paragraph-length 45)
     :diminish guess-language-mode)
+
+  (use-package go-translate
+    :ensure t
+    :config
+    (setq gt-langs '(es en))
+    (setq gt-default-translator (gt-translator :engines (gt-google-engine))))
 #+end_src
 
 * Keybinds
