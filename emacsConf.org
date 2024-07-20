@@ -420,8 +420,12 @@
     :config
     (setq org-ellipsis " ▾")
 
+    (setq org-todo-keywords
+      '((sequence "TODO(t)" "PROG(p)" "DONE(d)")))
+
     (setq org-return-follows-link t)
 
+    (setq org-agenda-span 10)
     (setq org-agenda-start-with-log-mode t)
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
@@ -431,7 +435,15 @@
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
     (efs/org-font-setup))
-#+end_src
+
+  (use-package evil-org
+    :ensure t
+    :after (evil org)
+    :hook (org-mode . (lambda () evil-org-mode))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+    #+end_src
 
 ** org-roam
 #+begin_src emacs-lisp
@@ -527,7 +539,7 @@
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :custom
-    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+    (org-bullets-bullet-list '("✖" "✦" "✧" "●" "○" "●" "○")))
 
   (use-package visual-fill-column
     :hook (org-mode . efs/org-mode-visual-fill))
@@ -542,6 +554,9 @@
   (add-to-list 'org-structure-template-alist '("calc" . "src calc"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
   (add-to-list 'org-structure-template-alist '("oc" . "src ocaml"))
+  (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+  (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
+  (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
 
   ;; Org babel for code blocks
   (with-eval-after-load 'org
