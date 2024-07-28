@@ -733,7 +733,13 @@
       (flycheck-ocaml-setup))
     (add-hook 'tuareg-mode-hook #'merlin-mode))
 #+end_src
-
+** C/C++
+#+begin_src emacs-lisp
+  ;;C/C++
+  (setq-default fill-column 80)
+  (add-hook 'c-mode-hook 'display-fill-column-indicator-mode)
+  (add-hook 'c++-mode-hook 'display-fill-column-indicator-mode)
+#+end_src
 ** Java
 #+begin_src emacs-lisp
   ;;Java
