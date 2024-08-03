@@ -1114,6 +1114,19 @@
     :init (zoom-mode t))
 #+end_src
 
+** Ledger
+#+begin_src emacs-lisp
+  ;; Ledger for finances 
+  (use-package ledger-mode
+    :ensure t
+    :config
+    (defun ledger-mode-clean-buffer-after-save ()
+      (when (eq major-mode 'ledger-mode)
+        (ledger-mode-clean-buffer)))
+  
+    (add-hook 'after-save-hook 'ledger-mode-clean-buffer-after-save))
+#+end_src
+
 ** Solaire mode
 #+begin_src emacs-lisp
   ;; Solaire mode 
