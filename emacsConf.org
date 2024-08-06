@@ -1090,6 +1090,7 @@
 #+begin_src emacs-lisp
 ;;WakaTime
 (use-package wakatime-mode)
+(global-wakatime-mode)
 #+end_src
 
 ** undo-fu
