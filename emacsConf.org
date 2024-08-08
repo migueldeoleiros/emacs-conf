@@ -94,6 +94,7 @@
       "c" '(cfw:open-org-calendar :which-key "calendar")
       "d" '(treemacs :which-key "treemacs")
       "f" '(find-file :which-key "find file")
+      "s" '(counsel-projectile-rg :which-key "search in project")
       "e" '(flycheck-list-errors :which-key "list of errors in code")
       "b" '(switch-to-buffer :which-key "buffer menu")
       "k" '(kill-buffer :which-key "kill buffer")
