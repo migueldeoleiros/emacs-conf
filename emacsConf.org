@@ -568,9 +568,6 @@
   (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
   (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
 
-  (use-package 'org-contrib
-    :ensure t)
-
   ;; Org babel for code blocks
   (with-eval-after-load 'org
     (org-babel-do-load-languages
