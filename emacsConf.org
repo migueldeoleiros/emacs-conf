@@ -23,6 +23,7 @@
   (setq package-archives
         '(("melpa" . "https://melpa.org/packages/")
           ("org" . "https://orgmode.org/elpa/")
+          ("nongnu" . "https://elpa.nongnu.org/nongnu/")
           ("elpa" . "https://elpa.gnu.org/packages/")))
 #+end_src
 
@@ -136,7 +137,8 @@
   ;; (add-hook 'server-after-make-frame-hook #'bs-sp-workaround)
 
   ;; Disable line numbers for some modes
-  (dolist (mode '(org-mode-hook cfw:calendar-mode-hook
+  (dolist (mode '(org-mode-hook
+                  cfw:calendar-mode-hook
                   shell-mode-hook
                   treemacs-mode-hook
                   term-mode-hook
@@ -566,12 +568,16 @@
   (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
   (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
 
+  (use-package 'org-contrib
+    :ensure t)
+
   ;; Org babel for code blocks
   (with-eval-after-load 'org
     (org-babel-do-load-languages
         'org-babel-load-languages
         '((emacs-lisp . t)
         (shell . t)
+        (ledger . t)
         (calc . t)
         (ocaml . t)
         (python . t)))
@@ -1125,8 +1131,13 @@
     (defun ledger-mode-clean-buffer-after-save ()
       (when (eq major-mode 'ledger-mode)
         (ledger-mode-clean-buffer)))
-  
-    (add-hook 'after-save-hook 'ledger-mode-clean-buffer-after-save))
+
+    (add-hook 'after-save-hook 'ledger-mode-clean-buffer-after-save)
+    (add-hook 'ledger-mode-hook 'company-mode))
+
+  (use-package company-ledger
+    :ensure t
+    :after ledger-mode)
 #+end_src
 
 ** Solaire mode
