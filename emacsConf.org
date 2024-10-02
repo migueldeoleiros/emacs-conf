@@ -1093,11 +1093,11 @@
   (setq rainbow-x-colors nil))
 #+end_src
 
-** WakaTime
+** ActivityWatch
 #+begin_src emacs-lisp
-;;WakaTime
-(use-package wakatime-mode)
-(global-wakatime-mode)
+;;ActivityWatch
+(use-package activity-watch-mode)
+(global-activity-watch-mode)
 #+end_src
 
 ** undo-fu
