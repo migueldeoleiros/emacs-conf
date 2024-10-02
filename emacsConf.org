@@ -832,6 +832,19 @@
   (use-package meson-mode)
 #+end_src
 
+** LaTeX
+#+begin_src emacs-lisp
+  ;;LaTeX
+  (use-package auctex
+    :ensure t
+    :defer t
+    :config
+    :hook (LaTeX-mode . (lambda ()
+              (push (list 'output-pdf "Zathura")
+                    TeX-view-program-election))))
+
+  (add-hook 'LaTeX-mode-hook 'company-mode)
+#+end_src
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
