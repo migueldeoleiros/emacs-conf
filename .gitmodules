@@ -1,0 +1,3 @@
+[submodule "dired-single"]
+	path = dired-single
+	url = https://github.com/emacsattic/dired-single

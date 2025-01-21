@@ -43,6 +43,7 @@
 #+begin_src emacs-lisp 
   ;;; PACKAGE UPDATE
   (use-package auto-package-update
+    :ensure t
     :custom
     (auto-package-update-interval 7)
     (auto-package-update-prompt-before-update t)
@@ -79,6 +80,7 @@
 #+begin_src emacs-lisp 
   ;;; KEYBINDS
   (use-package general
+    :ensure t
     :after evil
     :config
     (general-create-definer efs/leader-keys
@@ -159,7 +161,8 @@
 #+begin_src emacs-lisp
   ;;; THEME
   ;; Customizations prior to loading the themes
-  (use-package modus-themes)
+  (use-package modus-themes
+  :ensure t)
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
@@ -417,6 +420,7 @@
     (visual-line-mode 1))
 
   (use-package org
+    :ensure t
     :pin org
     :commands (org-capture org-agenda)
     :hook (org-mode . efs/org-mode-setup)
@@ -457,7 +461,7 @@
 
 ** org-roam
 #+begin_src emacs-lisp
-  ;;org-roam
+  ;; org-roam
   (use-package org-roam
     :ensure t
     :custom
@@ -549,7 +553,8 @@
 
 ** Look setup
 #+begin_src emacs-lisp
-  (use-package visual-fill-column)
+  (use-package visual-fill-column
+    :ensure t)
   (defun efs/org-mode-visual-fill ()
     "Center text on `org-mode'."
     (setq visual-fill-column-width 120
@@ -557,11 +562,13 @@
     (visual-fill-column-mode 1))
 
   (use-package org-bullets
+    :ensure t
     :hook (org-mode . org-bullets-mode)
     :custom
     (org-bullets-bullet-list '("✖" "✦" "✧" "●" "○" "●" "○")))
 
   (use-package visual-fill-column
+    :ensure t
     :hook (org-mode . efs/org-mode-visual-fill))
 #+end_src
 
@@ -584,7 +591,7 @@
         'org-babel-load-languages
         '((emacs-lisp . t)
         (shell . t)
-        (ledger . t)
+        ;;(ledger . t)
         (calc . t)
         (ocaml . t)
         (python . t)))
@@ -620,6 +627,7 @@
 #+begin_src emacs-lisp
   ;;; VIM
   (use-package evil
+    :ensure t
     :demand t
     :bind (("<escape>" . keyboard-escape-quit))
     :init
@@ -641,6 +649,7 @@
     (evil-set-initial-state 'dashboard-mode 'normal))
 
   (use-package evil-collection
+    :ensure t
     :after evil
     :config
     (setq evil-want-integration t)
@@ -660,6 +669,7 @@
 #+begin_src emacs-lisp
   ;;lsp
   (use-package lsp-mode
+    :ensure t
     :commands (lsp lsp-deferred)
     :hook (lsp-mode . efs/lsp-mode-setup)
     :bind
@@ -685,11 +695,13 @@
     (lsp-headerline-breadcrumb-mode))
 
   (use-package lsp-ui
+    :ensure t
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom))
 
   (use-package lsp-treemacs
+    :ensure t
     :after (lsp treemacs))
 #+end_src
 
@@ -705,6 +717,7 @@
 #+begin_src emacs-lisp
   ;;company
   (use-package company
+    :ensure t
     :after lsp-mode
     :hook (lsp-mode . company-mode)
     :bind (:map company-active-map
@@ -715,6 +728,7 @@
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.0))
   (use-package company-box
+    :ensure t
     :hook (company-mode . company-box-mode))
 #+end_src
 
@@ -722,8 +736,10 @@
 #+begin_src emacs-lisp
   ;;yasnippet
   (use-package yasnippet
+    :ensure t
     :config (yas-global-mode))
-  (use-package yasnippet-snippets)
+  (use-package yasnippet-snippets
+    :ensure t)
 
   ;; fix yasnippet conflicts
   (require 'company)
@@ -747,15 +763,16 @@
 ** Ocaml
 #+begin_src emacs-lisp
   ;;Ocaml
-  (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
-  (use-package flycheck-ocaml
-    :config
-    (with-eval-after-load 'merlin
-      ;; Disable Merlin's own error checking
-      (setq merlin-error-after-save nil)
-      ;; Enable Flycheck checker
-      (flycheck-ocaml-setup))
-    (add-hook 'tuareg-mode-hook #'merlin-mode))
+  ;;(require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
+  ;;(use-package flycheck-ocaml
+    ;;:ensure t
+    ;;:config
+    ;;(with-eval-after-load 'merlin
+      ;;;; Disable Merlin's own error checking
+      ;;(setq merlin-error-after-save nil)
+      ;;;; Enable Flycheck checker
+      ;;(flycheck-ocaml-setup))
+    ;;(add-hook 'tuareg-mode-hook #'merlin-mode))
 #+end_src
 ** C/C++
 #+begin_src emacs-lisp
@@ -768,6 +785,7 @@
 #+begin_src emacs-lisp
   ;;Java
   (use-package lsp-java
+    :ensure t
     :config (add-hook 'java-mode-hook 'lsp))
   (require 'lsp-java-boot)
   ;; to enable the lenses
@@ -789,6 +807,7 @@
     :config
     (require 'dap-python))
   (use-package pyvenv
+    :ensure t
     :after python-mode
     :config
     (pyvenv-mode 1))
@@ -809,6 +828,7 @@
 #+begin_src emacs-lisp
   ;;html-js
   (use-package web-mode
+    :ensure t
     :mode
     (".twig$"
      ".html?$"
@@ -830,9 +850,11 @@
 ** Flutter
 #+begin_src emacs-lisp
   ;;Flutter
-  (use-package dart-mode)
+  (use-package dart-mode
+    :ensure t)
 
   (use-package lsp-dart
+    :ensure t
     :after dart-mode
     :config (setq lsp-dart-dap-flutter-hot-reload-on-save  t))
 
@@ -843,13 +865,15 @@
 ** Nix
 #+begin_src emacs-lisp
   ;;Nix
-  (use-package nix-mode)
+  (use-package nix-mode
+    :ensure t)
 #+end_src
 
 ** Meson
 #+begin_src emacs-lisp
   ;;Meson
-  (use-package meson-mode)
+  (use-package meson-mode
+    :ensure t)
 #+end_src
 
 ** LaTeX
@@ -868,10 +892,16 @@
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
-  (use-package pdf-tools)
-  (use-package dired-single :defer t)
-  (use-package dired-ranger :defer t)
+  (use-package pdf-tools
+    :ensure t)
+  (setq load-path (cons "~/.emacs.d/dired-single" load-path))
+  (require 'dired-single)
+
+  (use-package dired-ranger
+    :ensure t
+    :defer t)
   (use-package dirvish
+    :ensure t
     :init
     (dirvish-override-dired-mode)
     :custom
@@ -931,19 +961,23 @@
 #+begin_src emacs-lisp
   ;;ivy
   (use-package ivy
+    :ensure t
     :config
     (ivy-mode t)
     (setq ivy-use-virtual-buffers t)
     (setq enable-recursive-minibuffers t))
 
   (use-package ivy-rich
+    :ensure t
     :after ivy
     :init (ivy-rich-mode t))
 
   (use-package counsel
+    :ensure t
     :config (counsel-mode t))
 
   (use-package ivy-prescient
+    :ensure t
     :after counsel
     :custom
     (ivy-prescient-enable-filtering nil)
@@ -952,6 +986,7 @@
     (ivy-prescient-mode t))
 
   (use-package lsp-ivy
+    :ensure t
     :after lsp)
 #+end_src
 
@@ -959,6 +994,7 @@
 #+begin_src emacs-lisp
   ;;projectile
   (use-package projectile
+    :ensure t
     :diminish projectile-mode
     :config (projectile-mode)
     :custom ((projectile-completion-system 'ivy))
@@ -971,6 +1007,7 @@
     (setq projectile-switch-project-action #'projectile-dired))
 
   (use-package counsel-projectile
+    :ensure t
     :after projectile
     :config (counsel-projectile-mode))
 #+end_src
@@ -1059,6 +1096,7 @@
 #+begin_src emacs-lisp
 ;;vterm
 (use-package vterm
+  :ensure t
   :commands vterm
   :config
   (setq vterm-shell "zsh")
@@ -1068,7 +1106,8 @@
 ** Calendar calfw
 #+begin_src emacs-lisp
 ;;org-mode calendar
-(use-package calfw-org)
+(use-package calfw-org
+  :ensure t)
 (setq calendar-week-start-day 1)
 #+end_src
 
@@ -1083,6 +1122,7 @@
 #+begin_src emacs-lisp
   ;;git-gutter
   (use-package git-gutter
+    :ensure t
     :hook (prog-mode . git-gutter-mode)
     :config
     (setq git-gutter:update-interval 0.02))
@@ -1093,6 +1133,7 @@
 #+begin_src emacs-lisp
 ;;whichKey
 (use-package which-key
+  :ensure t
   :defer 0
   :diminish which-key-mode
   :config
@@ -1104,6 +1145,7 @@
 #+begin_src emacs-lisp
 ;;commenting
 (use-package evil-nerd-commenter
+  :ensure t
   :bind ("C-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 
@@ -1111,6 +1153,7 @@
 #+begin_src emacs-lisp
 ;;Rainbow delimiters
 (use-package rainbow-delimiters
+  :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
@@ -1118,6 +1161,7 @@
 #+begin_src emacs-lisp
 ;;colorize color names
 (use-package rainbow-mode
+  :ensure t
   :config
   (setq rainbow-ansi-colors nil)
   (setq rainbow-x-colors nil))
@@ -1126,22 +1170,26 @@
 ** ActivityWatch
 #+begin_src emacs-lisp
 ;;ActivityWatch
-(use-package activity-watch-mode)
+(use-package activity-watch-mode
+  :ensure t)
 (global-activity-watch-mode)
 #+end_src
 
 ** undo-fu
 #+begin_src emacs-lisp
   ;; Better undo
-  (use-package undo-fu)
+  (use-package undo-fu
+    :ensure t)
   (use-package undo-fu-session
+    :ensure t
     :config
     (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
   (undo-fu-session-global-mode)
   (setq undo-fu-session-directory "~/.emacs.d/undo-history")
 
   ;;undo-tree
-  (use-package vundo)
+  (use-package vundo
+    :ensure t)
 #+end_src
 
 ** Zoom
