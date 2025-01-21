@@ -465,8 +465,10 @@
     (org-roam-completion-everywhere t)
     (org-roam-capture-templates
      '(("d" "default" plain
-        "\n- tags :: %?"
-        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        "\nLinks: %?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %u\n#+hugo_section: notes\n#+hugo_lastmod: %u\n#+hugo_tags: noexport\n")
+        :immediate-finish t
+        :empty-lines-after 1
         :unnarrowed t)))
     :bind (("C-c n l" . org-roam-buffer-toggle)
            ("C-c n f" . org-roam-node-find)
@@ -487,7 +489,7 @@
     (setq org-roam-dailies-capture-templates
           '(("d" "default" entry "%?"
              :target (file+head "%<%Y-%m-%d>.org"
-                                "#+title: %<%Y-%m-%d>\n#+filetags: journal\n \n- tags :: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n "))))
+                                "#+title: %<%Y-%m-%d>\n#+filetags: journal\n#+hugo_tags: noexport\n \nLinks: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n "))))
     (require 'org-roam-export)
     (require 'org-roam-protocol))
   (use-package org-roam-ui
@@ -527,14 +529,22 @@
     (interactive)
     ;; Add the project file to the agenda after capture is finished
     (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
-  
+
     ;; Select a project file to open, creating it if necessary
     (org-roam-node-find
      nil
      nil
      (my/org-roam-filter-by-tag "tasks")))
-  
+
   (global-set-key (kbd "C-c n t") #'my/org-roam-find-project)
+
+  ;; Update last modified date for ox-hugo export
+  (with-eval-after-load 'org
+   (setq time-stamp-active t
+         time-stamp-start "#\\+hugo_lastmod:[ \t]*"
+         time-stamp-end "$"
+         time-stamp-format "\[%Y-%m-%d\]")
+   (add-hook 'before-save-hook 'time-stamp))
 #+end_src
 
 ** Look setup
@@ -593,6 +603,16 @@
         '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
           "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
           "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+
+#+end_src
+
+** publish notes
+#+begin_src emacs-lisp
+  ;;publish notes
+  (use-package ox-hugo
+    :ensure t
+    :pin melpa
+    :after ox)
 
 #+end_src
 
@@ -1181,6 +1201,9 @@
 
   ;; autocomplete brackets
   (electric-pair-mode t)
+
+  ;; disable warning
+  (setq warning-minimum-level :emergency)
 
   ;; set custom
   (setq custom-file "~/.emacs.d/custom.el")
