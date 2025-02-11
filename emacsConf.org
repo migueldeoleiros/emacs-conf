@@ -671,6 +671,8 @@
   ;;lsp
   (use-package lsp-mode
     :ensure t
+    :init
+    (setq lsp-keymap-prefix "SPC l")
     :commands (lsp lsp-deferred)
     :hook (lsp-mode . efs/lsp-mode-setup)
     :bind
