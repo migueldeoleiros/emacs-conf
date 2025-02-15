@@ -592,6 +592,7 @@
         'org-babel-load-languages
         '((emacs-lisp . t)
         (shell . t)
+        (latex . t)
         ;;(ledger . t)
         (calc . t)
         (ocaml . t)
@@ -891,6 +892,7 @@
                     TeX-view-program-election))))
 
   (add-hook 'LaTeX-mode-hook 'company-mode)
+  (setq exec-path (append exec-path '("/usr/local/texlive/")))
 #+end_src
 * Dired
 #+begin_src emacs-lisp
