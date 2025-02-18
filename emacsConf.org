@@ -114,6 +114,7 @@
       "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
       "n" '(org-roam-node-find :which-key "org file with tasks")
       "t" '(vterm :which-key "teminal")
+      "p" '(copilot-chat-transient :which-key "copilot chat")
       "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
       "c" '(cfw:open-org-calendar :which-key "calendar")
       "d" '(treemacs :which-key "treemacs")
@@ -915,6 +916,43 @@
   (add-hook 'LaTeX-mode-hook 'company-mode)
   (setq exec-path (append exec-path '("/usr/local/texlive/")))
 #+end_src
+
+* AI tools
+** Aider
+Make sure to have a config file created with the API key
+for more informaction visit the [[https://aider.chat/docs][aider docs]]
+#+begin_src emacs-lisp
+;; (use-package aider
+;;   :straight (:host github :repo "tninja/aider.el" :files ("aider.el"))
+;;   :config
+;;   (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
+;;   (global-set-key (kbd "C-c a") 'aider-transient-menu))
+#+end_src
+
+** Copilot code completion
+Install the copilot server with ~copilot-install-server~
+Login to Copilot with ~copilot-login~. You can also check the status with ~copilot-diagnose~ (NotAuthorized means you don't have a valid subscription).
+
+#+begin_src emacs-lisp
+  (use-package copilot
+    :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+    :ensure t
+    :bind (:map copilot-completion-map
+                ("<tab>" . copilot-accept-completion)
+                  ("TAB" . copilot-accept-completion))
+  )
+#+end_src
+
+** Copilot chat
+Start chatting with ~copilot-chat-display~. Type your question in prompt, then press ~C-c C-c~ or ~C-c RET~. You may need to authenticate to GitHub. Follow instructions.
+#+begin_src emacs-lisp
+  (use-package copilot-chat
+    :ensure t
+    :config
+    (setq copilot-chat-frontend 'org)
+    :after (request org markdown-mode))
+#+end_src
+
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
