@@ -451,7 +451,12 @@
     (setq org-ellipsis " ▾")
 
     (setq org-todo-keywords
-      '((sequence "TODO(t)" "PROG(p)" "DONE(d)")))
+      '((sequence "TODO(t)" "PROG(p)" "|" "DONE(d)" "CANCELED(c)")))
+
+    (setq org-todo-keyword-faces
+      '(("TODO" . (:foreground "red" :weight bold))
+        ("PROG" . (:foreground "yellow"))
+        ("CANCELED" . (:foreground "white" :background "#4d4d4d" :weight bold))))
 
     (setq org-agenda-custom-commands
       '(("n" "Custom Agenda with TODOs"
@@ -1029,6 +1034,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     :config
     (ivy-mode t)
     (setq ivy-use-virtual-buffers t)
+    (setq ivy-use-selectable-prompt t)
     (setq enable-recursive-minibuffers t))
 
   (use-package ivy-rich
