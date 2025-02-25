@@ -112,7 +112,7 @@
       "C-s" '((lambda() (interactive)(set-input-method "spanish-prefix")) :which-key "change input method to spanish")
       "C-p" '((lambda() (interactive)(set-input-method "portuguese-prefix")) :which-key "change input method to portuguese")
       "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
-      "n" '(org-roam-node-find :which-key "org file with tasks")
+      "n" '(org-roam-node-find :which-key "search org-roam node")
       "t" '(vterm :which-key "teminal")
       "p" '(copilot-chat-transient :which-key "copilot chat")
       "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
@@ -608,6 +608,7 @@ If icons don't show up correctly consider installing the ttf through the package
     (define-key evil-normal-state-map "\C-w\C-l" 'evil-window-right)
     (define-key evil-motion-state-map (kbd "SPC") nil)
     (define-key evil-motion-state-map (kbd "RET") nil)
+    (define-key evil-normal-state-map (kbd "C-.") nil)
     (evil-set-initial-state 'messages-buffer-mode 'normal)
     (evil-set-initial-state 'dashboard-mode 'normal))
 
@@ -1036,6 +1037,16 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
 #+begin_src emacs-lisp
   ;;; Other packages
 #+end_src>
+** Embark
+#+begin_src emacs-lisp
+  (use-package embark
+    :ensure t
+    :bind (("C-." . embark-act)
+           :map minibuffer-local-map
+           ("C-c C-c" . embark-collect)
+           ("C-c C-e" . embark-export)))
+#+end_src
+
 ** Projectile
 #+begin_src emacs-lisp
   ;;projectile
@@ -1052,7 +1063,6 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     (setq projectile-project-search-path '("~/")))
     (setq projectile-switch-project-action #'projectile-dired))
 #+end_src
-
 ** Treemacs
 #+begin_src emacs-lisp
   ;;treemacs
