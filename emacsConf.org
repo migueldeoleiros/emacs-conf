@@ -652,6 +652,7 @@ If icons don't show up correctly consider installing the ttf through the package
     (add-hook 'cmake-mode-hook #'lsp)
     (add-hook 'bash-mode-hook #'lsp)
     (add-hook 'web-mode-hook #'lsp)
+    (add-hook 'typescript-mode-hook #'lsp)
     (add-hook 'dart-mode-hook #'lsp)
     (add-hook 'ocaml-mode-hook #'lsp)
 
@@ -811,6 +812,8 @@ If icons don't show up correctly consider installing the ttf through the package
           web-mode-enable-auto-opening t
           web-mode-enable-auto-pairing t
           web-mode-enable-auto-indentation t))
+  (use-package typescript-mode
+    :ensure t)
 #+end_src
 
 ** Flutter
