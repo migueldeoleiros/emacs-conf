@@ -120,6 +120,7 @@
       "d" '(treemacs :which-key "treemacs")
       "f" '(find-file :which-key "find file")
       "s" '(consult-grep :which-key "grep current directory")
+      "i" '(imenu-list-minor-mode :which-key "dynamic index buffer")
       "b" '(switch-to-buffer :which-key "buffer menu")
       "k" '(kill-buffer :which-key "kill buffer")
       "C-k" '(kill-buffer-and-window :which-key "kill buffer and window")
@@ -1256,12 +1257,44 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     :ensure t)
 #+end_src
 
+** Imenu-list
+#+begin_src emacs-lisp
+  ;; imenu list for dinamic index
+  (use-package imenu-list
+    :ensure t)
+#+end_src
+
 ** Zoom
 #+begin_src emacs-lisp
   ;; Resize splits 
   (use-package zoom
     :ensure t
     :init (zoom-mode t))
+
+  (defvar my/buffer-configurations
+    '((:buffer-name "*Ilist*" :hook imenu-list-update-hook :size 40)
+      (:buffer-name "*lsp-ui-imenu*" :hook lsp-imenu-buffer-mode-hook :size 40))
+    "List of buffer configurations. Each entry is a plist with keys:
+    - :buffer-name: The name of the buffer.
+    - :hook: The hook to trigger resizing.
+    - :size: The desired width of the buffer window.")
+
+  (defun my/fix-window-size (buffer-name size)
+    "Fix the window size for BUFFER-NAME to SIZE."
+    (when-let ((window (get-buffer-window buffer-name)))
+      (with-selected-window window
+        (setq window-size-fixed t)
+        (window-resize (selected-window) (- size (window-total-width)) t t))))
+
+  (defun my/setup-buffer-resizing ()
+    "Set up hooks to resize windows based on `my/buffer-configurations`."
+    (dolist (config my/buffer-configurations)
+      (let ((buffer-name (plist-get config :buffer-name))
+            (hook (plist-get config :hook))
+            (size (plist-get config :size)))
+        (add-hook hook (lambda () (my/fix-window-size buffer-name size))))))
+
+  (my/setup-buffer-resizing)
 #+end_src
 
 ** Ledger
