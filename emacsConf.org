@@ -669,6 +669,9 @@ If icons don't show up correctly consider installing the ttf through the package
     (add-hook 'c++-mode-hook #'lsp)
     (add-hook 'cmake-mode-hook #'lsp)
     (add-hook 'bash-mode-hook #'lsp)
+    (add-hook 'js-mode-hook #'lsp)
+    (add-hook 'js2-mode-hook #'lsp)
+    (add-hook 'rjsx-mode-hook #'lsp)
     (add-hook 'web-mode-hook #'lsp)
     (add-hook 'typescript-mode-hook #'lsp)
     (add-hook 'dart-mode-hook #'lsp)
@@ -775,6 +778,23 @@ If icons don't show up correctly consider installing the ttf through the package
   ;; to enable the lenses
   (add-hook 'lsp-mode-hook #'lsp-lens-mode)
   (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+
+  (setq lsp-java-configuration-maven-user-settings "/home/miguel/.m2/settings.xml")
+  (setq lsp-java-autobuild-enabled t)
+  (setq lsp-java-completion-enabled t)
+
+  (with-eval-after-load 'lsp-java
+    (setq lombok-library-path (concat "/home/miguel/.m2/lombok.jar"))
+
+    (unless (file-exists-p lombok-library-path)
+      (url-copy-file "https://projectlombok.org/downloads/lombok.jar" lombok-library-path))
+
+    (setq lsp-java-vmargs '("-XX:+UseParallelGC" "-XX:GCTimeRatio=4" "-XX:AdaptiveSizePolicyWeight=90" "-Dsun.zip.disableMemoryMapping=true" "-Xmx4G" "-Xms100m"))
+
+    (push (concat "-javaagent:"
+                    (expand-file-name lombok-library-path))
+            lsp-java-vmargs)
+  )
 #+end_src
 
 ** Python
