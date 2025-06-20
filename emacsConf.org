@@ -1206,9 +1206,13 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
 
 ** Magit
 #+begin_src emacs-lisp
-;;magit
-(use-package magit
-  :ensure t)
+  ;;magit
+  (use-package magit
+    :ensure t)
+
+  (use-package forge
+    :ensure t
+    :after magit)
 #+end_src
 
 ** Git-gutter
