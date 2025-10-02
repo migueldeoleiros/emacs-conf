@@ -113,7 +113,7 @@
       "C-p" '((lambda() (interactive)(set-input-method "portuguese-prefix")) :which-key "change input method to portuguese")
       "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
       "n" '(org-roam-node-find :which-key "search org-roam node")
-      "t" '((lambda() (interactive) (split-window-right) (other-window 1) (vterm)) :which-key "terminal in split")
+      "t" '((lambda() (interactive) (split-window-right) (other-window 1) (eat)) :which-key "terminal in split")
       "p" '(copilot-chat-transient :which-key "copilot chat")
       "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
       "c" '(cfw:open-org-calendar :which-key "calendar")
@@ -167,6 +167,7 @@
                   treemacs-mode-hook
                   term-mode-hook
                   vterm-mode-hook
+                  eat-mode-hook
                   eshell-mode-hook))
       (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -1105,6 +1106,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     (setq projectile-project-search-path '("~/")))
     (setq projectile-switch-project-action #'projectile-dired))
 #+end_src
+
 ** Treemacs
 #+begin_src emacs-lisp
   ;;treemacs
@@ -1185,15 +1187,19 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
  
 #+end_src
 
-** Vterm
+** Terminal
 #+begin_src emacs-lisp
-;;vterm
-(use-package vterm
-  :ensure t
-  :commands vterm
-  :config
-  (setq vterm-shell "zsh")
-  (setq vterm-max-scrollback 10000))
+  ;;vterm
+  (use-package vterm
+    :ensure t
+    :commands vterm
+    :config
+    (setq vterm-shell "zsh")
+    (setq vterm-max-scrollback 10000))
+
+  ;;eat
+  (use-package eat
+    :ensure t)
 #+end_src
 
 ** Calendar calfw
@@ -1213,6 +1219,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
   (use-package forge
     :ensure t
     :after magit)
+
 #+end_src
 
 ** Git-gutter
