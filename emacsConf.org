@@ -189,100 +189,103 @@ If icons don't show up correctly consider installing the ttf through the package
   ;;; THEME
   ;; Customizations prior to loading the themes
   (use-package modus-themes
-  :ensure t)
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs t
-        modus-themes-mixed-fonts t
-        modus-themes-variable-pitch-ui t
-        modus-themes-org-blocks 'gray-background)
+    :ensure t
+    :init
+    ;; Customizations before loading the theme
+    (setq modus-themes-italic-constructs t
+          modus-themes-bold-constructs t
+          modus-themes-mixed-fonts t
+          modus-themes-variable-pitch-ui t
+          modus-themes-org-blocks 'gray-background)
 
-  (require 'modus-vivendi-tinted-theme)
-  (setq modus-vivendi-tinted-palette-overrides
-        '(
-        (bg-main          "#0f0f0f")
-        (bg-dim           "#191919")
-        (fg-main          "#ffffff")
-        (fg-dim           "#b9b9b9")
-        (fg-alt           "#e0e0e0")
-        (bg-active        "#4b4b4b")
-        (bg-inactive      "#2d2d2d")
-        (border           "#2d2d2d")
+    (setq modus-vivendi-tinted-palette-overrides
+          '(
+          (bg-main          "#0f0f0f")
+          (bg-dim           "#191919")
+          (fg-main          "#ffffff")
+          (fg-dim           "#b9b9b9")
+          (fg-alt           "#e0e0e0")
+          (bg-active        "#4b4b4b")
+          (bg-inactive      "#2d2d2d")
+          (border           "#2d2d2d")
 
-        (gray            "#191919")
-        (gray-faint      "#2d2d2d")
-        (gray-light      "#4b4b4b")
-        (whiteish        "#e0e0e0")
-        (light-gray      "#b9b9b9")
+          (gray            "#191919")
+          (gray-faint      "#2d2d2d")
+          (gray-light      "#4b4b4b")
+          (whiteish        "#e0e0e0")
+          (light-gray      "#b9b9b9")
 
-        (bg-completion       bg-blue-subtle)
-        (bg-hover            bg-cyan-sublte)
-        (bg-hl-line          bg-purple-subtle)
-        (bg-region           gray-light)
-        (fg-region           witheish)
 
-        (bg-char-0 bg-blue-subtle)
-        (bg-char-1 bg-magenta-subtle)
-        (bg-char-2 bg-yellow-subtle)
+          (bg-completion       bg-blue-subtle)
+          (bg-hover            bg-cyan-sublte)
+          (bg-hl-line          bg-purple-subtle)
+          (bg-region           gray-light)
+          (fg-region           witheish)
 
-        (bg-mode-line-active        gray)
-        (fg-mode-line-active        whiteish)
-        (border-mode-line-active    unespecified)
-        (bg-mode-line-inactive      gray-faint)
-        (fg-mode-line-inactive      light-gray)
-        (border-mode-line-inactive  unespecified)
+          (bg-char-0 bg-blue-subtle)
+          (bg-char-1 bg-magenta-subtle)
+          (bg-char-2 bg-yellow-subtle)
 
-        (modeline-err     red-faint)
-        (modeline-warning yellow-faint)
-        (modeline-info    cyan-faint)
+          (bg-mode-line-active        gray)
+          (fg-mode-line-active        whiteish)
+          (border-mode-line-active    unespecified)
+          (bg-mode-line-inactive      gray-faint)
+          (fg-mode-line-inactive      light-gray)
+          (border-mode-line-inactive  unespecified)
 
-        (bg-tab-bar      gray-faint)
-        (bg-tab-current  bg-main)
-        (bg-tab-other    gray-light)
+          (modeline-err     red-faint)
+          (modeline-warning yellow-faint)
+          (modeline-info    cyan-faint)
 
-        ;;mapping
-        (fringe bg-dim)
-        (cursor yellow-faint)
+          (bg-tab-bar      gray-faint)
+          (bg-tab-current  bg-main)
+          (bg-tab-other    gray-light)
 
-        (keybind blue-faint)
-        (name magenta-faint)
-        (identifier yellow-faint)
+          ;;mapping
+          (fringe bg-dim)
+          (cursor yellow-faint)
 
-        (err red)
-        (warning yellow)
-        (info cyan)
+          (keybind blue-faint)
+          (name magenta-faint)
+          (identifier yellow-faint)
 
-        (underline-err red)
-        (underline-warning yellow)
-        (underline-note cyan)
+          (err red)
+          (warning yellow)
+          (info cyan)
 
-        ;;headings
-        (fg-heading-0 whiteish)
-        (fg-heading-1 cyan-faint)
-        (fg-heading-2 yellow-faint)
-        (fg-heading-3 blue-faint)
-        (fg-heading-4 magenta-faint)
-        (fg-heading-5 green-faint)
-        (fg-heading-8 purple-faint)
-        (fg-heading-7 orange-faint)
-        (fg-heading-6 red-faint)
+          (underline-err red)
+          (underline-warning yellow)
+          (underline-note cyan)
 
-        ;;code
-        (builtin purple)
-        (comment green-faint)
-        (constant blue-faint)
-        (docstring cyan-faint)
-        (docmarkup orange-faint)
-        (fnname purple-faint)
-        (keyword magenta-faint)
-        (preprocessor red-faint)
-        (string green)
-        (type cyan-faint)
-        (variable cyan)
-        (rx-construct green-cooler)
-        (rx-backslash orange)
-         ))
+          ;;headings
+          (fg-heading-0 whiteish)
+          (fg-heading-1 cyan-faint)
+          (fg-heading-2 yellow-faint)
+          (fg-heading-3 blue-faint)
+          (fg-heading-4 magenta-faint)
+          (fg-heading-5 green-faint)
+          (fg-heading-8 purple-faint)
+          (fg-heading-7 orange-faint)
+          (fg-heading-6 red-faint)
 
-  (load-theme 'modus-vivendi-tinted :no-confirm)
+          ;;code
+          (builtin purple)
+          (comment green-faint)
+          (constant blue-faint)
+          (docstring cyan-faint)
+          (docmarkup orange-faint)
+          (fnname purple-faint)
+          (keyword magenta-faint)
+          (preprocessor red-faint)
+          (string green)
+          (type cyan-faint)
+          (variable cyan)
+          (rx-construct green-cooler)
+          (rx-backslash orange)))
+
+    :config
+    ;; Load the theme (no confirmation)
+    (load-theme 'modus-vivendi-tinted :no-confirm))
 #+end_src
 
 ** Background and terminal opacity
