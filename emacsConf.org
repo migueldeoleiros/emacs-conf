@@ -679,6 +679,7 @@ If icons don't show up correctly consider installing the ttf through the package
     (add-hook 'web-mode-hook #'lsp)
     (add-hook 'typescript-mode-hook #'lsp)
     (add-hook 'dart-mode-hook #'lsp)
+    (add-hook 'rust-mode-hook #'lsp)
     (add-hook 'ocaml-mode-hook #'lsp)
 
   (defun efs/lsp-mode-setup ()
@@ -900,6 +901,13 @@ If icons don't show up correctly consider installing the ttf through the package
 
   (add-hook 'LaTeX-mode-hook 'company-mode)
   (setq exec-path (append exec-path '("/usr/local/texlive/")))
+#+end_src
+
+** Nix
+#+begin_src emacs-lisp
+  ;;Rust
+  (use-package rust-mode
+    :ensure t)
 #+end_src
 
 * AI tools
