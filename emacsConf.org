@@ -182,10 +182,10 @@
     :custom ((doom-modeline-height 28)))
 #+end_src
 
-If icons don't show up correctly consider installing the ttf through the package manager of your distro, in arch ~ttf-all-the-icons~ (aur)
+Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro Nerd Font is set as default).
 #+begin_src emacs-lisp
   ;;icons
-  (use-package all-the-icons
+  (use-package nerd-icons
     :ensure t)
 #+end_src
 ** Theme
@@ -975,7 +975,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     (setq dirvish-mode-line-format
           '(:left (sort symlink) :right (omit yank index)))
     (setq dirvish-attributes
-          '(all-the-icons file-size collapse subtree-state))
+          '(nerd-icons file-size collapse subtree-state))
     (setq delete-by-moving-to-trash t)
     (setq dired-listing-switches
           "-l --almost-all --human-readable --group-directories-first --no-group")
@@ -1038,12 +1038,12 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     :init
     (marginalia-mode))
 
-  (use-package all-the-icons-completion
+  (use-package nerd-icons-completion
     :ensure t
-    :after (marginalia all-the-icons)
-    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :after (marginalia nerd-icons)
+    :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
     :init
-    (all-the-icons-completion-mode))
+    (nerd-icons-completion-mode))
 
   (use-package consult
     :ensure t
