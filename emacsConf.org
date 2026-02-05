@@ -484,7 +484,6 @@ If icons don't show up correctly consider installing the ttf through the package
     :ensure t
     :after org-roam)
 
-  (require 'org-roam)
   (defun my/org-roam-filter-by-tag (tag-name)
     (lambda (node)
       (member tag-name (org-roam-node-tags node))))
@@ -497,10 +496,12 @@ If icons don't show up correctly consider installing the ttf through the package
 
   (defun my/org-roam-refresh-agenda-list ()
     (interactive)
+    (require 'org-roam)
     (setq org-agenda-files (my/org-roam-list-notes-by-tag "tasks")))
 
-  ;; Build the agenda list the first time for the session
-  (my/org-roam-refresh-agenda-list)
+  ;; Build the agenda list lazily before org-agenda calls
+  (advice-add 'org-agenda :before
+    (lambda (&rest _) (my/org-roam-refresh-agenda-list)))
 
   (defun my/org-roam-project-finalize-hook ()
     "Adds the captured project file to `org-agenda-files' if the
@@ -558,19 +559,19 @@ If icons don't show up correctly consider installing the ttf through the package
 
 ** code blocks
 #+begin_src emacs-lisp
-  ;; source block
-  (require 'org-tempo)
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("calc" . "src calc"))
-  (add-to-list 'org-structure-template-alist '("py" . "src python"))
-  (add-to-list 'org-structure-template-alist '("oc" . "src ocaml"))
-  (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
-  (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
-  (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
-
-  ;; Org babel for code blocks
   (with-eval-after-load 'org
+    ;; source block templates
+    (require 'org-tempo)
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    (add-to-list 'org-structure-template-alist '("calc" . "src calc"))
+    (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    (add-to-list 'org-structure-template-alist '("oc" . "src ocaml"))
+    (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+    (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
+    (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
+
+    ;; Org babel for code blocks
     (org-babel-do-load-languages
         'org-babel-load-languages
         '((emacs-lisp . t)
@@ -581,20 +582,20 @@ If icons don't show up correctly consider installing the ttf through the package
         (ocaml . t)
         (python . t)))
 
-  (push '("conf-unix" . conf-unix) org-src-lang-modes))
+    (push '("conf-unix" . conf-unix) org-src-lang-modes))
 #+end_src
 
 ** latex export
 #+begin_src emacs-lisp
   ;;colors in latex export
-  (require 'ox-latex)
-  (add-to-list 'org-latex-packages-alist '("" "minted"))
-  (setq org-latex-src-block-backend 'minted)
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-packages-alist '("" "minted"))
+    (setq org-latex-src-block-backend 'minted)
 
-  (setq org-latex-pdf-process
-        '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-          "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-          "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+    (setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")))
 
 #+end_src
 
@@ -733,18 +734,18 @@ If icons don't show up correctly consider installing the ttf through the package
     :ensure t)
 
   ;; fix yasnippet conflicts
-  (require 'company)
-  (defun company-yasnippet-or-completion ()
-    "Use Yasnippet or fall back to company completion."
-    (interactive)
-    (unless (yas-maybe-expand-abbrev-key-filter 'yas-triggers-in-field)
-      (call-interactively #'company-complete-common)))
+  (with-eval-after-load 'company
+    (defun company-yasnippet-or-completion ()
+      "Use Yasnippet or fall back to company completion."
+      (interactive)
+      (unless (yas-maybe-expand-abbrev-key-filter 'yas-triggers-in-field)
+        (call-interactively #'company-complete-common)))
 
-  (add-hook 'company-mode-hook
-            (lambda ()
-              (substitute-key-definition 'company-complete-common
-                                         'company-yasnippet-or-completion
-                                          company-active-map)))
+    (add-hook 'company-mode-hook
+              (lambda ()
+                (substitute-key-definition 'company-complete-common
+                                           'company-yasnippet-or-completion
+                                            company-active-map))))
 #+end_src
 
 * Language setup
@@ -944,8 +945,9 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
   ;;;DIRED
   (use-package pdf-tools
     :ensure t)
-  (setq load-path (cons "~/.emacs.d/dired-single" load-path))
-  (require 'dired-single)
+  (add-to-list 'load-path "~/.emacs.d/dired-single")
+  (with-eval-after-load 'dired
+    (require 'dired-single))
 
   (use-package dired-ranger
     :ensure t
@@ -1367,60 +1369,59 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
 ** org-present
 Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/][systemcrafters' configuration]] for org presentations
 #+begin_src emacs-lisp
-;; Install org-present if needed
-(unless (package-installed-p 'org-present)
-  (package-install 'org-present))
+(use-package org-present
+  :ensure t
+  :commands org-present
+  :config
+  (defun my/org-present-prepare-slide (buffer-name heading)
+    ;; Show only top-level headlines
+    (org-overview)
 
-(defun my/org-present-prepare-slide (buffer-name heading)
-  ;; Show only top-level headlines
-  (org-overview)
+    ;; Unfold the current entry
+    (org-show-entry)
 
-  ;; Unfold the current entry
-  (org-show-entry)
+    ;; Show only direct subheadings of the slide but don't expand them
+    (org-show-children))
 
-  ;; Show only direct subheadings of the slide but don't expand them
-  (org-show-children))
+  (defun my/org-present-start ()
+    ;; Tweak font sizes
+    (setq-local face-remapping-alist '((default (:height 2.5) variable-pitch)
+                                       (header-line (:height 4.0) variable-pitch)
+                                       (org-document-title (:height 2.75) org-document-title)
+                                       (org-code (:height 2.55) org-code)
+                                       (org-table (:height 2.55) org-table)
+                                       (org-formula (:height 2.55 :foreground "#ffffff") org-formula)
+                                       (org-verbatim (:height 2.55) org-verbatim)
+                                       (org-block (:height 2.25) org-block)
+                                       (org-block-begin-line (:height 2.7) org-block)))
 
-(defun my/org-present-start ()
-  ;; Tweak font sizes
-  (setq-local face-remapping-alist '((default (:height 2.5) variable-pitch)
-                                     (header-line (:height 4.0) variable-pitch)
-                                     (org-document-title (:height 2.75) org-document-title)
-                                     (org-code (:height 2.55) org-code)
-                                     (org-table (:height 2.55) org-table)
-                                     (org-formula (:height 2.55 :foreground "#ffffff") org-formula)
-                                     (org-verbatim (:height 2.55) org-verbatim)
-                                     (org-block (:height 2.25) org-block)
-                                     (org-block-begin-line (:height 2.7) org-block)))
+    ;; Set a blank header line string to create blank space at the top
+    (setq header-line-format " ")
 
-  ;; Set a blank header line string to create blank space at the top
-  (setq header-line-format " ")
+    ;; Display inline images automatically
+    (org-display-inline-images)
 
-  ;; Display inline images automatically
-  (org-display-inline-images)
+    ;; Center the presentation and wrap lines
+    (visual-fill-column-mode 1)
+    (visual-line-mode 1))
 
-  ;; Center the presentation and wrap lines
-  (visual-fill-column-mode 1)
-  (visual-line-mode 1))
+  (defun my/org-present-end ()
+    ;; Reset font customizations
+    (setq-local face-remapping-alist '((default variable-pitch default)))
 
-(defun my/org-present-end ()
-  ;; Reset font customizations
-  (setq-local face-remapping-alist '((default variable-pitch default)))
+    ;; Clear the header line string so that it isn't displayed
+    (setq header-line-format nil)
 
-  ;; Clear the header line string so that it isn't displayed
-  (setq header-line-format nil)
+    ;; Stop displaying inline images
+    (org-remove-inline-images)
 
-  ;; Stop displaying inline images
-  (org-remove-inline-images)
+    ;; Stop centering the document
+    (visual-fill-column-mode 0)
+    (visual-line-mode 0))
 
-  ;; Stop centering the document
-  (visual-fill-column-mode 0)
-  (visual-line-mode 0))
-
-;; Register hooks with org-present
-(add-hook 'org-present-mode-hook 'my/org-present-start)
-(add-hook 'org-present-mode-quit-hook 'my/org-present-end)
-(add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+  (add-hook 'org-present-mode-hook 'my/org-present-start)
+  (add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+  (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide))
 #+end_src
 
 * Other configs
