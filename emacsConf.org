@@ -10,10 +10,11 @@
   ;; Minimize garbage collection during startup
   (setq gc-cons-threshold most-positive-fixnum)
 
-  ;; Lower threshold to speed up garbage collection
-  (add-hook 'emacs-statup-hook
+  ;; Lower threshold after startup (100MB for LSP performance)
+  (add-hook 'emacs-startup-hook
             (lambda()
-              (setq gc-cons-threshold (* 5 1000 1000))))
+              (setq gc-cons-threshold (* 100 1024 1024))
+              (setq read-process-output-max (* 1024 1024))))
 #+end_src
 
 * Package management 
@@ -31,11 +32,11 @@
 #+begin_src emacs-lisp 
   ;;; BOOTSTRAP USE-PACKAGES
   (package-initialize)
-  (require 'use-package-ensure)
-  (setq use-package-always-ensure t)
   (unless (package-installed-p 'use-package)
       (package-refresh-contents)
       (package-install 'use-package))
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
   (eval-when-compile (require 'use-package))
 #+end_src
 
@@ -77,7 +78,7 @@
 * Language spelling and typing 
 #+begin_src emacs-lisp 
   ;;; LANGUAGE SPELLING AND TYPING
-  (set-input-method 'spanish-prefix)
+  (setq default-input-method "spanish-prefix")
   (use-package guess-language  ;Automatically detect language for Flyspell
     :ensure t
     :defer t
@@ -217,10 +218,10 @@ If icons don't show up correctly consider installing the ttf through the package
 
 
           (bg-completion       bg-blue-subtle)
-          (bg-hover            bg-cyan-sublte)
+          (bg-hover            bg-cyan-subtle)
           (bg-hl-line          bg-purple-subtle)
           (bg-region           gray-light)
-          (fg-region           witheish)
+          (fg-region           whiteish)
 
           (bg-char-0 bg-blue-subtle)
           (bg-char-1 bg-magenta-subtle)
@@ -228,10 +229,10 @@ If icons don't show up correctly consider installing the ttf through the package
 
           (bg-mode-line-active        gray)
           (fg-mode-line-active        whiteish)
-          (border-mode-line-active    unespecified)
+          (border-mode-line-active    unspecified)
           (bg-mode-line-inactive      gray-faint)
           (fg-mode-line-inactive      light-gray)
-          (border-mode-line-inactive  unespecified)
+          (border-mode-line-inactive  unspecified)
 
           (modeline-err     red-faint)
           (modeline-warning yellow-faint)
@@ -264,9 +265,9 @@ If icons don't show up correctly consider installing the ttf through the package
           (fg-heading-3 blue-faint)
           (fg-heading-4 magenta-faint)
           (fg-heading-5 green-faint)
-          (fg-heading-8 purple-faint)
+          (fg-heading-6 purple-faint)
           (fg-heading-7 orange-faint)
-          (fg-heading-6 red-faint)
+          (fg-heading-8 red-faint)
 
           ;;code
           (builtin purple)
@@ -390,7 +391,6 @@ If icons don't show up correctly consider installing the ttf through the package
 ** Basic setup
 #+begin_src emacs-lisp
   ;;; ORG-MODE
-  (require 'org)
   (defun efs/org-mode-setup ()
     "Set up `org-mode'."
     (org-indent-mode)
@@ -437,7 +437,7 @@ If icons don't show up correctly consider installing the ttf through the package
   (use-package evil-org
     :ensure t
     :after (evil org)
-    :hook (org-mode . (lambda () evil-org-mode))
+    :hook (org-mode . evil-org-mode)
     :config
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys))
@@ -537,8 +537,6 @@ If icons don't show up correctly consider installing the ttf through the package
 
 ** Look setup
 #+begin_src emacs-lisp
-  (use-package visual-fill-column
-    :ensure t)
   (defun efs/org-mode-visual-fill ()
     "Center text on `org-mode'."
     (setq visual-fill-column-width 120
@@ -650,7 +648,7 @@ If icons don't show up correctly consider installing the ttf through the package
 * Code completion and correction
 #+begin_src emacs-lisp
   ;;; Code Completion and correction
-#+end_src>
+#+end_src
 ** lsp
 #+begin_src emacs-lisp
   ;;lsp
@@ -666,8 +664,6 @@ If icons don't show up correctly consider installing the ttf through the package
     :config
     (lsp-enable-which-key-integration t))
     (add-hook 'dockerfile-mode-hook #'lsp)
-    (add-hook 'java-mode-hook #'lsp)
-    (add-hook 'python-mode-hook #'lsp)
     (add-hook 'sql-mode-hook #'lsp)
     (add-hook 'c-mode-hook #'lsp)
     (add-hook 'c++-mode-hook #'lsp)
@@ -869,9 +865,6 @@ If icons don't show up correctly consider installing the ttf through the package
     :ensure t
     :after dart-mode
     :config (setq lsp-dart-dap-flutter-hot-reload-on-save  t))
-
-  (setq gc-cons-threshold (* 100 1024 1024)
-        read-process-output-max (* 1024 1024))
 #+end_src
 
 ** Nix
@@ -894,10 +887,9 @@ If icons don't show up correctly consider installing the ttf through the package
   (use-package auctex
     :ensure t
     :defer t
-    :config
     :hook (LaTeX-mode . (lambda ()
               (push (list 'output-pdf "Zathura")
-                    TeX-view-program-election))))
+                    TeX-view-program-selection))))
 
   (add-hook 'LaTeX-mode-hook 'company-mode)
   (setq exec-path (append exec-path '("/usr/local/texlive/")))
@@ -997,7 +989,6 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
      ("f"   . dirvish-file-info-menu)
      ("y"   . dirvish-yank-menu)
      ("N"   . dirvish-narrow)
-     ("y"   . dired-ranger-copy)
      ("X"   . dired-ranger-move)
      ("p"   . dired-ranger-paste)
      ("TAB" . dirvish-subtree-toggle)
@@ -1090,7 +1081,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
 * Other packages
 #+begin_src emacs-lisp
   ;;; Other packages
-#+end_src>
+#+end_src
 ** Embark
 #+begin_src emacs-lisp
   (use-package embark
@@ -1113,8 +1104,7 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     ("C-c p" . projectile-command-map)
     :init
     ;; NOTE: Set this to the folder where you keep your Git repos!
-    (when (file-directory-p "~/")
-    (setq projectile-project-search-path '("~/")))
+    (setq projectile-project-search-path '("~/dev" "~/projects"))
     (setq projectile-switch-project-action #'projectile-dired))
 #+end_src
 
@@ -1242,6 +1232,13 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     :config
     (setq git-gutter:update-interval 0.02))
 
+#+end_src
+
+** Docker
+#+begin_src emacs-lisp
+  (use-package docker
+    :ensure t
+    :bind ("C-c d" . docker))
 #+end_src
 
 ** WhichKey
@@ -1418,9 +1415,6 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   (visual-fill-column-mode 0)
   (visual-line-mode 0))
 
-;; Turn on variable pitch fonts in Org Mode buffers
-(add-hook 'org-mode-hook 'variable-pitch-mode)
-
 ;; Register hooks with org-present
 (add-hook 'org-present-mode-hook 'my/org-present-start)
 (add-hook 'org-present-mode-quit-hook 'my/org-present-end)
@@ -1432,7 +1426,7 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   ;;; Other configurations
 
   ;; always ask for `y` or `n` instead of `yes` or `no`
-  (defalias 'yes-or-no-p 'y-or-n-p)
+  (setq use-short-answers t)
 
   ;;scrolling
   (setq scroll-margin 8
@@ -1456,7 +1450,7 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 
   ;; set custom
   (setq custom-file "~/.emacs.d/custom.el")
-  (load custom-file)
+  (load custom-file 'noerror)
 
   ;; backup directorie
   (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
@@ -1474,6 +1468,4 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
     (browse-url (concat "http://www.duckduckgo.com/?q="
                         (url-hexify-string url))))
 
-  ;;redefine dired-find-file to open on custom program
-  (define-key dired-mode-map [remap dired-find-file] 'dired-open-file)
 #+end_src
