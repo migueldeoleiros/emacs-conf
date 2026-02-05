@@ -412,8 +412,9 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
       '((sequence "TODO(t)" "PROG(p)" "|" "DONE(d)" "CANCELED(c)")))
 
     (setq org-todo-keyword-faces
-      '(("TODO" . (:foreground "red" :weight bold))
-        ("PROG" . (:foreground "yellow"))
+      '(("TODO" . (:foreground "white" :background "red" :weight bold))
+        ("PROG" . (:foreground "black" :background "yellow" :weight bold))
+        ("DONE" . (:foreground "black" :background "green" :weight bold))
         ("CANCELED" . (:foreground "white" :background "#4d4d4d" :weight bold))))
 
     (setq org-agenda-custom-commands
@@ -548,11 +549,15 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
           visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
-  (use-package org-bullets
+  (use-package org-modern
     :ensure t
-    :hook (org-mode . org-bullets-mode)
+    :hook (org-mode . org-modern-mode)
     :custom
-    (org-bullets-bullet-list '("✖" "✦" "✧" "●" "○" "●" "○")))
+    (org-modern-star '("●" "○" "◆" "◇" "●" "○" "◆"))
+    :config
+    (set-face-attribute 'org-modern-label nil :height 1.0 :width 'regular)
+    (set-face-attribute 'org-modern-todo nil :inverse-video nil)
+    (set-face-attribute 'org-modern-done nil :inverse-video nil))
 
   (use-package visual-fill-column
     :ensure t
