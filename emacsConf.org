@@ -1456,6 +1456,9 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   (setq c-basic-offset 4) 
   (c-set-offset 'comment-intro 0)
 
+  ;; auto-refresh buffers changed on disk
+  (global-auto-revert-mode 1)
+
   ;; autocomplete brackets
   (electric-pair-mode t)
 
