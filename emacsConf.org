@@ -121,6 +121,7 @@
       "c" '(cfw:open-org-calendar :which-key "calendar")
       "d" '(treemacs :which-key "treemacs")
       "f" '(find-file :which-key "find file")
+      "r" '(consult-recent-file :which-key "recent files")
       "s" '(consult-grep :which-key "grep current directory")
       "/" '(consult-line :which-key "search in buffer")
       "i" '(imenu-list-minor-mode :which-key "dynamic index buffer")
@@ -1020,6 +1021,10 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
   (use-package savehist
     :init
     (savehist-mode))
+
+  (use-package recentf
+    :config
+    (recentf-mode))
 
   (use-package orderless
     :ensure t
