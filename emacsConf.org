@@ -922,23 +922,23 @@ for more informaction visit the [[https://aider.chat/docs][aider docs]]
 Install the copilot server with ~copilot-install-server~
 Login to Copilot with ~copilot-login~. You can also check the status with ~copilot-diagnose~ (NotAuthorized means you don't have a valid subscription).
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package copilot
     :ensure t
+    :hook (prog-mode . copilot-mode)
     :bind (:map copilot-completion-map
                 ("<tab>" . copilot-accept-completion)
-                  ("TAB" . copilot-accept-completion))
-  )
+                ("TAB" . copilot-accept-completion)))
 #+end_src
 
 ** Copilot chat
 Start chatting with ~copilot-chat-display~. Type your question in prompt, then press ~C-c C-c~ or ~C-c RET~. You may need to authenticate to GitHub. Follow instructions.
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package copilot-chat
     :ensure t
+    :after (request org markdown-mode)
     :config
-    (setq copilot-chat-frontend 'org)
-    :after (request org markdown-mode))
+    (setq copilot-chat-frontend 'org))
 #+end_src
 
 * Dired
