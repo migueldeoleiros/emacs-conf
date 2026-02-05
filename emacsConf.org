@@ -554,6 +554,8 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :hook (org-mode . org-modern-mode)
     :custom
     (org-modern-star '("●" "○" "◆" "◇" "●" "○" "◆"))
+    (org-modern-block-fringe nil)
+    (org-modern-block-name nil)
     :config
     (set-face-attribute 'org-modern-label nil :height 1.0 :width 'regular)
     (set-face-attribute 'org-modern-todo nil :inverse-video nil)
@@ -673,20 +675,20 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
           (("M-RET" . lsp-execute-code-action)))
     :config
     (lsp-enable-which-key-integration t))
-    (add-hook 'dockerfile-mode-hook #'lsp)
-    (add-hook 'sql-mode-hook #'lsp)
-    (add-hook 'c-mode-hook #'lsp)
-    (add-hook 'c++-mode-hook #'lsp)
-    (add-hook 'cmake-mode-hook #'lsp)
-    (add-hook 'sh-mode-hook #'lsp)
-    (add-hook 'js-mode-hook #'lsp)
-    (add-hook 'js2-mode-hook #'lsp)
-    (add-hook 'rjsx-mode-hook #'lsp)
-    (add-hook 'web-mode-hook #'lsp)
-    (add-hook 'typescript-mode-hook #'lsp)
-    (add-hook 'dart-mode-hook #'lsp)
-    (add-hook 'rust-mode-hook #'lsp)
-    (add-hook 'ocaml-mode-hook #'lsp)
+    (dolist (hook '(dockerfile-mode-hook dockerfile-ts-mode-hook
+                   sql-mode-hook
+                   c-mode-hook         c-ts-mode-hook
+                   c++-mode-hook       c++-ts-mode-hook
+                   cmake-mode-hook     cmake-ts-mode-hook
+                   sh-mode-hook        bash-ts-mode-hook
+                   js-mode-hook        js-ts-mode-hook
+                   js2-mode-hook       rjsx-mode-hook
+                   web-mode-hook
+                   typescript-mode-hook typescript-ts-mode-hook
+                   dart-mode-hook
+                   rust-mode-hook      rust-ts-mode-hook
+                   ocaml-mode-hook))
+      (add-hook hook #'lsp))
 
   (defun efs/lsp-mode-setup ()
     "Set up lsp mode."
@@ -759,6 +761,17 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
 #+begin_src emacs-lisp
   ;;; Language specific configurations
 #+end_src
+** Tree-sitter
+#+begin_src emacs-lisp
+  ;;tree-sitter automatic grammar management
+  (use-package treesit-auto
+    :ensure t
+    :custom
+    (treesit-auto-install 'prompt)
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode))
+#+end_src
 ** Ocaml
 #+begin_src emacs-lisp
   ;;Ocaml
@@ -778,17 +791,22 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
   ;;C/C++
   (setq-default fill-column 80)
   (add-hook 'c-mode-hook 'display-fill-column-indicator-mode)
+  (add-hook 'c-ts-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'c++-mode-hook 'display-fill-column-indicator-mode)
+  (add-hook 'c++-ts-mode-hook 'display-fill-column-indicator-mode)
 #+end_src
 ** Java
 #+begin_src emacs-lisp
   ;;Java
   (use-package lsp-java
     :ensure t
-    :config (add-hook 'java-mode-hook 'lsp))
+    :config
+    (add-hook 'java-mode-hook 'lsp)
+    (add-hook 'java-ts-mode-hook 'lsp))
   ;; to enable the lenses
   (add-hook 'lsp-mode-hook #'lsp-lens-mode)
   (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+  (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
 
   (setq lsp-java-configuration-maven-user-settings "/home/miguel/.m2/settings.xml")
   (setq lsp-java-autobuild-enabled t)
@@ -813,7 +831,8 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
   ;;Python
   (use-package python-mode
     :ensure t
-    :hook (python-mode . lsp-deferred)
+    :hook ((python-mode . lsp-deferred)
+           (python-ts-mode . lsp-deferred))
     :custom
     ;; NOTE: Set these if Python 3 is called "python3" on your system!
     ;; (python-shell-interpreter "python3")
