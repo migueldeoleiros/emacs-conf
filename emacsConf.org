@@ -674,7 +674,13 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     (:map lsp-mode-map
           (("M-RET" . lsp-execute-code-action)))
     :config
-    (lsp-enable-which-key-integration t))
+    (lsp-enable-which-key-integration t)
+    (setq lsp-file-watch-threshold 5000)
+    (dolist (dir '("[/\\\\]\\.emacs\\.d\\'"
+                   "[/\\\\]elpa\\'"
+                   "[/\\\\]eln-cache\\'"
+                   "[/\\\\]straight\\'"))
+      (add-to-list 'lsp-file-watch-ignored-directories dir)))
     (dolist (hook '(dockerfile-mode-hook dockerfile-ts-mode-hook
                    sql-mode-hook
                    c-mode-hook         c-ts-mode-hook
@@ -802,7 +808,11 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :ensure t
     :config
     (add-hook 'java-mode-hook 'lsp)
-    (add-hook 'java-ts-mode-hook 'lsp))
+    (add-hook 'java-ts-mode-hook 'lsp)
+    (dolist (dir '("[/\\\\]target\\'"
+                   "[/\\\\]\\.gradle\\'"
+                   "[/\\\\]build\\'"))
+      (add-to-list 'lsp-file-watch-ignored-directories dir)))
   ;; to enable the lenses
   (add-hook 'lsp-mode-hook #'lsp-lens-mode)
   (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
