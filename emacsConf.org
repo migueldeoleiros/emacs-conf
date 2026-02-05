@@ -79,6 +79,7 @@
 #+begin_src emacs-lisp 
   ;;; LANGUAGE SPELLING AND TYPING
   (setq default-input-method "spanish-prefix")
+  (add-hook 'text-mode-hook #'flyspell-mode)
   (use-package guess-language  ;Automatically detect language for Flyspell
     :ensure t
     :defer t
@@ -376,7 +377,6 @@ If icons don't show up correctly consider installing the ttf through the package
   
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
     (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
     (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
     (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
@@ -528,11 +528,13 @@ If icons don't show up correctly consider installing the ttf through the package
 
   ;; Update last modified date for ox-hugo export
   (with-eval-after-load 'org
-   (setq time-stamp-active t
-         time-stamp-start "#\\+hugo_lastmod:[ \t]*"
-         time-stamp-end "$"
-         time-stamp-format "\[%Y-%m-%d\]")
-   (add-hook 'before-save-hook 'time-stamp))
+   (add-hook 'org-mode-hook
+    (lambda ()
+      (setq-local time-stamp-active t
+                  time-stamp-start "#\\+hugo_lastmod:[ \t]*"
+                  time-stamp-end "$"
+                  time-stamp-format "\[%Y-%m-%d\]")
+      (add-hook 'before-save-hook 'time-stamp nil t))))
 #+end_src
 
 ** Look setup
@@ -617,6 +619,7 @@ If icons don't show up correctly consider installing the ttf through the package
     ;; allow for using cgn
     ;; (setq evil-search-module 'evil-search)
     (setq evil-want-keybinding nil)
+    (setq evil-want-integration t)
     ;; no vim insert bindings
     (setq evil-undo-system 'undo-fu)
     :config
@@ -636,7 +639,6 @@ If icons don't show up correctly consider installing the ttf through the package
     :ensure t
     :after evil
     :config
-    (setq evil-want-integration t)
     (evil-collection-init))
 
   ;; Change cursor terminal
@@ -668,7 +670,7 @@ If icons don't show up correctly consider installing the ttf through the package
     (add-hook 'c-mode-hook #'lsp)
     (add-hook 'c++-mode-hook #'lsp)
     (add-hook 'cmake-mode-hook #'lsp)
-    (add-hook 'bash-mode-hook #'lsp)
+    (add-hook 'sh-mode-hook #'lsp)
     (add-hook 'js-mode-hook #'lsp)
     (add-hook 'js2-mode-hook #'lsp)
     (add-hook 'rjsx-mode-hook #'lsp)
@@ -747,8 +749,8 @@ If icons don't show up correctly consider installing the ttf through the package
 
 * Language setup
 #+begin_src emacs-lisp
-  ;;; Language specific configurations 
-#+end_src>
+  ;;; Language specific configurations
+#+end_src
 ** Ocaml
 #+begin_src emacs-lisp
   ;;Ocaml
@@ -1465,7 +1467,7 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   (defun search (url)
     "Opens a browser and search URL DuckDuckGo for the given string."
     (interactive "sSearch for: ")
-    (browse-url (concat "http://www.duckduckgo.com/?q="
+    (browse-url (concat "https://duckduckgo.com/?q="
                         (url-hexify-string url))))
 
 #+end_src
