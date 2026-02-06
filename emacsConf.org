@@ -554,6 +554,7 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :hook (org-mode . org-modern-mode)
     :custom
     (org-modern-star '("●" "○" "◆" "◇" "●" "○" "◆"))
+    (org-modern-table nil)
     (org-modern-block-fringe nil)
     (org-modern-block-name nil)
     :config
