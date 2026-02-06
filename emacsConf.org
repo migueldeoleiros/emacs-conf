@@ -1481,6 +1481,23 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide))
 #+end_src
 
+** Elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :ensure t
+    :commands (elfeed)
+    :config
+    (setq elfeed-db-directory "~/.elfeed")
+    (setq elfeed-enclosure-default-dir (expand-file-name "~/Downloads")))
+
+  (use-package elfeed-org
+    :ensure t
+    :after (elfeed)
+    :config
+    (setq rmh-elfeed-org-files '("~/.emacs.d/elfeed.org"))
+    (elfeed-org))
+#+end_src
+
 * Other configs
 #+begin_src emacs-lisp
   ;;; Other configurations
