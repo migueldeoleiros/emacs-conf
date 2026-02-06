@@ -977,6 +977,17 @@ Start chatting with ~copilot-chat-display~. Type your question in prompt, then p
     (setq copilot-chat-frontend 'org))
 #+end_src
 
+** Claude AI
+This doesn't seem much better than just using a terminal on the side, but supposedly you can get a better integration with the MCP
+#+begin_src emacs-lisp :tangle no
+  ;; claude-code
+  (use-package claude-code-ide
+    :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+    :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
+    :config
+    (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+#+end_src
+
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
