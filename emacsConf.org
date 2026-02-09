@@ -79,18 +79,18 @@
 #+begin_src emacs-lisp 
   ;;; LANGUAGE SPELLING AND TYPING
   (setq default-input-method "spanish-prefix")
-  (add-hook 'text-mode-hook #'flyspell-mode)
-  (use-package guess-language  ;Automatically detect language for Flyspell
+
+  ;; Jinx - fast spell checker with multi-language support (requires libenchant)
+  ;; On non-NixOS systems with Nix installed, the Nix linker can't find system libs
+  (when (file-directory-p "/usr/lib")
+    (setq jinx-flags '("-L/usr/lib")))
+  (use-package jinx
     :ensure t
-    :defer t
-    :init (add-hook 'text-mode-hook #'guess-language-mode)
-    :config
-    (setq guess-language-langcodes '((en . ("en_US" "English" "🇺🇸" "American"))
-                                     (pt . ("pt_PT" "Portuguese" "🇵🇹" "Portuguese"))
-                                     (es . ("es_ES" "Spanish" "🇪🇸" "Spanish")))
-          guess-language-languages '(en es pt)
-          guess-language-min-paragraph-length 45)
-    :diminish guess-language-mode)
+    :hook ((text-mode . jinx-mode)
+           (prog-mode . jinx-mode))
+    :bind ([remap ispell-word] . jinx-correct)
+    :custom
+    (jinx-languages "en_US es_ES pt_PT"))
 
   (use-package go-translate
     :ensure t
