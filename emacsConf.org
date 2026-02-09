@@ -118,7 +118,7 @@
       "t" '((lambda() (interactive) (split-window-right) (other-window 1) (eat)) :which-key "terminal in split")
       "p" '(copilot-chat-transient :which-key "copilot chat")
       "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
-      "c" '(cfw:open-org-calendar :which-key "calendar")
+      "c" '(calfw-org-open-calendar :which-key "calendar")
       "d" '(treemacs :which-key "treemacs")
       "f" '(find-file :which-key "find file")
       "r" '(consult-recent-file :which-key "recent files")
@@ -166,7 +166,7 @@
 
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
-                  cfw:calendar-mode-hook
+                  calfw-calendar-mode-hook
                   shell-mode-hook
                   treemacs-mode-hook
                   term-mode-hook
@@ -1243,8 +1243,19 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
 ;;org-mode calendar
 (use-package calfw-org
-  :ensure t)
+  :ensure t
+  :commands calfw-org-open-calendar
+  :config
+  ;; Ensure org-roam agenda files are loaded before calfw uses them
+  (advice-add 'calfw-org-open-calendar :before
+              (lambda (&rest _) (my/org-roam-refresh-agenda-list))))
 (setq calendar-week-start-day 1)
+;; Let calfw's built-in vi-style bindings (h/j/k/l) work without evil intercepting
+(with-eval-after-load 'calfw
+  (evil-set-initial-state 'calfw-calendar-mode 'emacs)
+  ;; Fix j/k being swapped relative to vim convention
+  (define-key calfw-calendar-mode-map "j" 'calfw-navi-next-week-command)
+  (define-key calfw-calendar-mode-map "k" 'calfw-navi-previous-week-command))
 #+end_src
 
 ** Magit
