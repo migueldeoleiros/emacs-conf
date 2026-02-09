@@ -856,6 +856,14 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
            (python-ts-mode . pyvenv-mode)))
 #+end_src
 
+** Markdown
+#+begin_src emacs-lisp
+  ;;Markdown
+  (use-package markdown-mode
+    :ensure t
+    :mode ("\\.md\\'" . gfm-mode))
+#+end_src
+
 ** Erlang
 #+begin_src emacs-lisp
   ;;Erlang
