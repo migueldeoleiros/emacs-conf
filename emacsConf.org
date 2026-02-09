@@ -696,9 +696,12 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
                    web-mode-hook
                    typescript-mode-hook typescript-ts-mode-hook
                    dart-mode-hook
+                   python-mode-hook    python-ts-mode-hook
                    rust-mode-hook      rust-ts-mode-hook
-                   ocaml-mode-hook))
-      (add-hook hook #'lsp))
+                   nix-mode-hook       nix-ts-mode-hook
+                   meson-mode-hook
+                   LaTeX-mode-hook))
+      (add-hook hook #'lsp-deferred))
 
   (defun efs/lsp-mode-setup ()
     "Set up lsp mode."
@@ -716,7 +719,7 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :after (lsp treemacs))
 #+end_src
 
-** flychek
+** flycheck
 #+begin_src emacs-lisp
   ;;flycheck
   (use-package flycheck
@@ -779,16 +782,8 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
 ** Ocaml
 #+begin_src emacs-lisp
   ;;Ocaml
-  ;;(require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
-  ;;(use-package flycheck-ocaml
-    ;;:ensure t
-    ;;:config
-    ;;(with-eval-after-load 'merlin
-      ;;;; Disable Merlin's own error checking
-      ;;(setq merlin-error-after-save nil)
-      ;;;; Enable Flycheck checker
-      ;;(flycheck-ocaml-setup))
-    ;;(add-hook 'tuareg-mode-hook #'merlin-mode))
+  ;;(add-hook 'tuareg-mode-hook #'lsp-deferred)
+  ;;(add-hook 'caml-mode-hook #'lsp-deferred)
 #+end_src
 ** C/C++
 #+begin_src emacs-lisp
@@ -833,22 +828,10 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
 ** Python
 #+begin_src emacs-lisp
   ;;Python
-  (use-package python-mode
-    :ensure t
-    :hook ((python-mode . lsp-deferred)
-           (python-ts-mode . lsp-deferred))
-    :custom
-    ;; NOTE: Set these if Python 3 is called "python3" on your system!
-    ;; (python-shell-interpreter "python3")
-    ;; (dap-python-executable "python3")
-    (dap-python-debugger 'debugpy)
-    :config
-    (require 'dap-python))
   (use-package pyvenv
     :ensure t
-    :after python-mode
-    :config
-    (pyvenv-mode 1))
+    :hook ((python-mode . pyvenv-mode)
+           (python-ts-mode . pyvenv-mode)))
 #+end_src
 
 ** Erlang
@@ -882,7 +865,7 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
           web-mode-script-padding 4
           web-mode-enable-auto-closing t
           web-mode-enable-auto-opening t
-          web-mode-enable-auto-pairing t
+          web-mode-enable-auto-pairing nil
           web-mode-enable-auto-indentation t))
   (use-package typescript-mode
     :ensure t)
@@ -927,7 +910,7 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
   (setq exec-path (append exec-path '("/usr/local/texlive/")))
 #+end_src
 
-** Nix
+** Rust
 #+begin_src emacs-lisp
   ;;Rust
   (use-package rust-mode
