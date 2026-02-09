@@ -541,6 +541,20 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
       (add-hook 'before-save-hook 'time-stamp nil t))))
 #+end_src
 
+** org-download
+#+begin_src emacs-lisp
+  ;; org-download - drag-and-drop and paste images into org files
+  (use-package org-download
+    :ensure t
+    :after org
+    :hook ((org-mode . org-download-enable)
+           (dired-mode . org-download-enable))
+    :custom
+    (org-download-method 'directory)
+    (org-download-image-dir "images")
+    (org-download-heading-lvl nil))
+#+end_src
+
 ** Look setup
 #+begin_src emacs-lisp
   (defun efs/org-mode-visual-fill ()
