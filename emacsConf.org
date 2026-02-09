@@ -23,7 +23,6 @@
   ;;;PACKAGE LIST
   (setq package-archives
         '(("melpa" . "https://melpa.org/packages/")
-          ("org" . "https://orgmode.org/elpa/")
           ("nongnu" . "https://elpa.nongnu.org/nongnu/")
           ("elpa" . "https://elpa.gnu.org/packages/")))
 #+end_src
@@ -38,6 +37,10 @@
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
   (eval-when-compile (require 'use-package))
+
+  ;; diminish - hide minor modes from modeline (used by :diminish in use-package)
+  (use-package diminish
+    :ensure t)
 #+end_src
 
 ** Bootstrap straight.el
@@ -116,7 +119,6 @@
       "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
       "n" '(org-roam-node-find :which-key "search org-roam node")
       "t" '((lambda() (interactive) (split-window-right) (other-window 1) (eat)) :which-key "terminal in split")
-      "p" '(copilot-chat-transient :which-key "copilot chat")
       "a" '((lambda() (interactive)(org-agenda nil "n")) :which-key "org week agenda with todos")
       "c" '(calfw-org-open-calendar :which-key "calendar")
       "d" '(treemacs :which-key "treemacs")
@@ -401,7 +403,6 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
 
   (use-package org
     :ensure t
-    :pin org
     :commands (org-capture org-agenda)
     :hook (org-mode . efs/org-mode-setup)
     :bind (("C-c l" . org-store-link))
@@ -1114,7 +1115,8 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)))
 
-  (use-package consult-projectile)
+  (use-package consult-projectile
+    :ensure t)
 #+end_src
 
 ** Ivy
