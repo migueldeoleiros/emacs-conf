@@ -1,0 +1,14 @@
+* Feeds                                                             :elfeed:
+** Blogs                                                              :blogs:
+*** [[https://blog.m19182.dev/index.xml][Mateo's Blog]]
+*** https://timothyjohnsonsci.com/index.xml
+*** https://www.asterhu.com/index.xml
+*** https://nickdiego.dev/index.xml
+*** https://drewdevault.com/blog/index.xml
+*** https://blog.vaxry.net/feed
+** News                                                                :news:
+*** [[https://itsfoss.com/rss/][It's FOSS]]
+** Projects                                                        :projects:
+*** https://github.com/immich-app/immich/releases.atom
+*** https://github.com/hyprwm/Hyprland/releases.atom
+*** https://github.com/vicinaehq/vicinae/releases.atom

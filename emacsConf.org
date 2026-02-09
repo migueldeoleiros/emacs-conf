@@ -1453,19 +1453,32 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 
 ** Elfeed
 #+begin_src emacs-lisp
+  (use-package elfeed-org
+    :ensure t
+    :defer t
+    :init
+    (setq rmh-elfeed-org-files '("~/.emacs.d/elfeed.org")))
+
   (use-package elfeed
     :ensure t
     :commands (elfeed)
     :config
     (setq elfeed-db-directory "~/.elfeed")
-    (setq elfeed-enclosure-default-dir (expand-file-name "~/Downloads")))
+    (setq elfeed-enclosure-default-dir (expand-file-name "~/Downloads"))
 
-  (use-package elfeed-org
-    :ensure t
-    :after (elfeed)
-    :config
-    (setq rmh-elfeed-org-files '("~/.emacs.d/elfeed.org"))
-    (elfeed-org))
+    ;; Initialize elfeed-org before first update
+    (require 'elfeed-org)
+    (elfeed-org)
+
+    ;; Display entry in a split pane
+    (setq elfeed-show-entry-switch #'elfeed-display-buffer)
+    (defun elfeed-display-buffer (buf &optional act)
+      (pop-to-buffer buf)
+      (set-window-text-height (get-buffer-window) (round (* 0.7 (frame-height)))))
+
+    ;; Use eww to read articles inside Emacs (S-RET / go)
+    (add-hook 'elfeed-show-mode-hook
+              (lambda () (setq-local browse-url-browser-function #'eww-browse-url))))
 #+end_src
 
 * Other configs
