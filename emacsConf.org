@@ -39,8 +39,7 @@
   (eval-when-compile (require 'use-package))
 
   ;; diminish - hide minor modes from modeline (used by :diminish in use-package)
-  (use-package diminish
-    :ensure t)
+  (use-package diminish)
 #+end_src
 
 ** Bootstrap straight.el
@@ -68,7 +67,6 @@
 #+begin_src emacs-lisp 
   ;;; PACKAGE UPDATE
   (use-package auto-package-update
-    :ensure t
     :custom
     (auto-package-update-interval 7)
     (auto-package-update-prompt-before-update t)
@@ -88,7 +86,6 @@
   (when (file-directory-p "/usr/lib")
     (setq jinx-flags '("-L/usr/lib")))
   (use-package jinx
-    :ensure t
     :hook ((text-mode . jinx-mode)
            (prog-mode . jinx-mode))
     :bind ([remap ispell-word] . jinx-correct)
@@ -96,7 +93,6 @@
     (jinx-languages "en_US es_ES pt_PT"))
 
   (use-package go-translate
-    :ensure t
     :config
     (setq gt-langs '(es en))
     (setq gt-default-translator (gt-translator :engines (gt-google-engine))))
@@ -106,7 +102,6 @@
 #+begin_src emacs-lisp 
   ;;; KEYBINDS
   (use-package general
-    :ensure t
     :after evil
     :config
     (general-create-definer my/leader-keys
@@ -156,16 +151,21 @@
   (setq split-width-threshold 0)
   (setq split-height-threshold nil)
 
-  ;; padding
-  ;; (use-package spacious-padding
-  ;;   :config (spacious-padding-mode 1))
-  ;; (defun bs-sp-workaround ()
-  ;;   "Workaround issues with `spacious-padding-mode' when using emacsclient."
-  ;;   (when server-mode
-  ;;     (spacious-padding-mode 1)
-  ;;     (remove-hook 'server-after-make-frame-hook #'bs-sp-workaround)))
-  ;; (add-hook 'server-after-make-frame-hook #'bs-sp-workaround)
+#+end_src
 
+Spacious padding workaround for emacsclient:
+#+begin_src emacs-lisp :tangle no
+  (use-package spacious-padding
+    :config (spacious-padding-mode 1))
+  (defun bs-sp-workaround ()
+    "Workaround issues with `spacious-padding-mode' when using emacsclient."
+    (when server-mode
+      (spacious-padding-mode 1)
+      (remove-hook 'server-after-make-frame-hook #'bs-sp-workaround)))
+  (add-hook 'server-after-make-frame-hook #'bs-sp-workaround)
+#+end_src
+
+#+begin_src emacs-lisp
   ;; Disable line numbers for some modes
   (dolist (mode '(org-mode-hook
                   calfw-calendar-mode-hook
@@ -179,7 +179,6 @@
 
   ;;modeline
   (use-package doom-modeline
-    :ensure t
     :init (doom-modeline-mode 1)
     :custom ((doom-modeline-height 28)))
 #+end_src
@@ -187,15 +186,13 @@
 Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Nerd Font is set as default).
 #+begin_src emacs-lisp
   ;;icons
-  (use-package nerd-icons
-    :ensure t)
+  (use-package nerd-icons)
 #+end_src
 ** Theme
 #+begin_src emacs-lisp
   ;;; THEME
   ;; Customizations prior to loading the themes
   (use-package modus-themes
-    :ensure t
     :init
     ;; Customizations before loading the theme
     (setq modus-themes-italic-constructs t
@@ -295,23 +292,25 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+end_src
 
 ** Background and terminal opacity
+Old background overrides:
+#+begin_src emacs-lisp :tangle no
+  (defun set-black-background()
+    "Make theme's background color black."
+    (set-face-background 'default "#000000" (selected-frame)))
+
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (set-black-background))))
+      (set-black-background))
+
+  ;; Transparent background on GUI
+  (set-frame-parameter nil 'alpha-background 80)
+  (add-to-list 'default-frame-alist '(alpha-background . 80))
+#+end_src
+
 #+begin_src emacs-lisp
- ;;  (defun set-black-background()
- ;;    "Make theme's background color black."
- ;;    (set-face-background 'default "#000000" (selected-frame)))
-
- ;;  (if (daemonp)
- ;;    (add-hook 'after-make-frame-functions
- ;;              (lambda (frame)
- ;;                ;; (setq doom-modeline-icon t)
- ;;                (with-selected-frame frame
- ;;                  (set-black-background))))
- ;;    (set-black-background))
-
-;; Transparent background on GUI
-;; (set-frame-parameter nil 'alpha-background 80)
-;; (add-to-list 'default-frame-alist '(alpha-background . 80))
- 
 (defun on-frame-open (&optional frame)
   "If the FRAME is created in a terminal don't load background color."
   (unless (display-graphic-p frame)
@@ -352,10 +351,13 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
                   (with-selected-frame frame
                     (my/set-font-faces))))
       (my/set-font-faces))
+#+end_src
 
-    ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
-    ;; (set-face-attribute 'fixed-pitch nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
-    ;; (set-face-attribute 'variable-pitch nil :font "Noto Sans" :height efs/default-variable-font-size :weight 'regular)
+Old font settings:
+#+begin_src emacs-lisp :tangle no
+  (set-face-attribute 'default nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
+  (set-face-attribute 'fixed-pitch nil :font "SauceCodePro Nerd Font" :height efs/default-font-size)
+  (set-face-attribute 'variable-pitch nil :font "Noto Sans" :height efs/default-variable-font-size :weight 'regular)
 #+end_src
 
 ** Add support for 256colors on ST
@@ -402,7 +404,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (visual-line-mode 1))
 
   (use-package org
-    :ensure t
+    :ensure nil
     :commands (org-capture org-agenda)
     :hook (org-mode . my/org-mode-setup)
     :bind (("C-c l" . org-store-link))
@@ -439,7 +441,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (my/org-font-setup))
 
   (use-package evil-org
-    :ensure t
     :after (evil org)
     :hook (org-mode . evil-org-mode)
     :config
@@ -451,7 +452,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;; org-roam
   (use-package org-roam
-    :ensure t
     :custom
     (org-roam-directory (file-truename "~/notes"))
     (org-roam-completion-everywhere t)
@@ -485,7 +485,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (require 'org-roam-export)
     (require 'org-roam-protocol))
   (use-package org-roam-ui
-    :ensure t
     :after org-roam)
 
   (defun my/org-roam-filter-by-tag (tag-name)
@@ -546,7 +545,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;; org-download - drag-and-drop and paste images into org files
   (use-package org-download
-    :ensure t
     :after org
     :hook ((org-mode . org-download-enable)
            (dired-mode . org-download-enable))
@@ -565,7 +563,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (visual-fill-column-mode 1))
 
   (use-package org-modern
-    :ensure t
     :hook (org-mode . org-modern-mode)
     :custom
     (org-modern-star '("●" "○" "◆" "◇" "●" "○" "◆"))
@@ -578,7 +575,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (set-face-attribute 'org-modern-done nil :inverse-video nil))
 
   (use-package visual-fill-column
-    :ensure t
     :hook (org-mode . my/org-mode-visual-fill))
 #+end_src
 
@@ -628,7 +624,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;publish notes
   (use-package ox-hugo
-    :ensure t
     :pin melpa
     :after ox)
 
@@ -638,7 +633,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;; VIM
   (use-package evil
-    :ensure t
     :demand t
     :bind (("<escape>" . keyboard-escape-quit))
     :init
@@ -662,18 +656,15 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (evil-set-initial-state 'dashboard-mode 'normal))
 
   (use-package evil-collection
-    :ensure t
     :after evil
     :config
     (evil-collection-init))
 
   (use-package evil-surround
-    :ensure t
     :after evil
     :config (global-evil-surround-mode 1))
 
   (use-package evil-snipe
-    :ensure t
     :after evil
     :config
     (evil-snipe-mode 1)
@@ -691,13 +682,44 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+end_src
 ** lsp
 #+begin_src emacs-lisp
+  (defun my/lsp-mode-setup ()
+    "Set up lsp mode."
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
+
   ;;lsp
   (use-package lsp-mode
-    :ensure t
     :init
     (setq lsp-keymap-prefix "C-l")
     :commands (lsp lsp-deferred)
-    :hook (lsp-mode . my/lsp-mode-setup)
+    :hook ((lsp-mode . my/lsp-mode-setup)
+           (dockerfile-mode . lsp-deferred)
+           (dockerfile-ts-mode . lsp-deferred)
+           (sql-mode . lsp-deferred)
+           (c-mode . lsp-deferred)
+           (c-ts-mode . lsp-deferred)
+           (c++-mode . lsp-deferred)
+           (c++-ts-mode . lsp-deferred)
+           (cmake-mode . lsp-deferred)
+           (cmake-ts-mode . lsp-deferred)
+           (sh-mode . lsp-deferred)
+           (bash-ts-mode . lsp-deferred)
+           (js-mode . lsp-deferred)
+           (js-ts-mode . lsp-deferred)
+           (js2-mode . lsp-deferred)
+           (rjsx-mode . lsp-deferred)
+           (web-mode . lsp-deferred)
+           (typescript-mode . lsp-deferred)
+           (typescript-ts-mode . lsp-deferred)
+           (dart-mode . lsp-deferred)
+           (python-mode . lsp-deferred)
+           (python-ts-mode . lsp-deferred)
+           (rust-mode . lsp-deferred)
+           (rust-ts-mode . lsp-deferred)
+           (nix-mode . lsp-deferred)
+           (nix-ts-mode . lsp-deferred)
+           (meson-mode . lsp-deferred)
+           (LaTeX-mode . lsp-deferred))
     :bind
     (:map lsp-mode-map
           (("M-RET" . lsp-execute-code-action)))
@@ -712,37 +734,13 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
                    "[/\\\\]eln-cache\\'"
                    "[/\\\\]straight\\'"))
       (add-to-list 'lsp-file-watch-ignored-directories dir)))
-    (dolist (hook '(dockerfile-mode-hook dockerfile-ts-mode-hook
-                   sql-mode-hook
-                   c-mode-hook         c-ts-mode-hook
-                   c++-mode-hook       c++-ts-mode-hook
-                   cmake-mode-hook     cmake-ts-mode-hook
-                   sh-mode-hook        bash-ts-mode-hook
-                   js-mode-hook        js-ts-mode-hook
-                   js2-mode-hook       rjsx-mode-hook
-                   web-mode-hook
-                   typescript-mode-hook typescript-ts-mode-hook
-                   dart-mode-hook
-                   python-mode-hook    python-ts-mode-hook
-                   rust-mode-hook      rust-ts-mode-hook
-                   nix-mode-hook       nix-ts-mode-hook
-                   meson-mode-hook
-                   LaTeX-mode-hook))
-      (add-hook hook #'lsp-deferred))
-
-  (defun my/lsp-mode-setup ()
-    "Set up lsp mode."
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
 
   (use-package lsp-ui
-    :ensure t
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-ui-doc-position 'bottom))
 
   (use-package lsp-treemacs
-    :ensure t
     :after (lsp treemacs))
 #+end_src
 
@@ -750,7 +748,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;flycheck
   (use-package flycheck
-    :ensure t
     :init (global-flycheck-mode))
 #+end_src
 
@@ -758,7 +755,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;apheleia - auto-format on save (prettier, black, rustfmt, etc.)
   (use-package apheleia
-    :ensure t
     :init (apheleia-global-mode))
 #+end_src
 
@@ -766,23 +762,30 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;corfu - in-buffer completion
   (use-package corfu
-    :ensure t
     :custom
     (corfu-auto t)
-    (corfu-auto-delay 0.0)
+    (corfu-auto-delay 0.30)
     (corfu-auto-prefix 1)
     (corfu-cycle t)
     :init
-    (global-corfu-mode))
+    (global-corfu-mode)
+    :config
+    (defun my/corfu-disable-auto ()
+      "Disable corfu auto-completion in the current buffer."
+      (setq-local corfu-auto nil))
+    (dolist (hook '(org-mode-hook
+                    markdown-mode-hook
+                    gfm-mode-hook
+                    text-mode-hook
+                    elfeed-show-mode-hook))
+      (add-hook hook #'my/corfu-disable-auto)))
 
   (use-package nerd-icons-corfu
-    :ensure t
     :after corfu
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
   (use-package cape
-    :ensure t
     :init
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-dabbrev))
@@ -792,10 +795,8 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;yasnippet
   (use-package yasnippet
-    :ensure t
     :config (yas-global-mode))
-  (use-package yasnippet-snippets
-    :ensure t)
+  (use-package yasnippet-snippets)
 
 #+end_src
 
@@ -807,7 +808,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;tree-sitter automatic grammar management
   (use-package treesit-auto
-    :ensure t
     :custom
     (treesit-auto-install 'prompt)
     :config
@@ -833,7 +833,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;Java
   (use-package lsp-java
-    :ensure t
     :hook ((java-mode . lsp-deferred)
            (java-ts-mode . lsp-deferred))
     :custom
@@ -864,7 +863,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;Python
   (use-package pyvenv
-    :ensure t
     :hook ((python-mode . pyvenv-mode)
            (python-ts-mode . pyvenv-mode)))
 #+end_src
@@ -873,7 +871,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;Markdown
   (use-package markdown-mode
-    :ensure t
     :mode ("\\.md\\'" . gfm-mode))
 #+end_src
 
@@ -892,7 +889,6 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+begin_src emacs-lisp
   ;;html-js
   (use-package web-mode
-    :ensure t
     :mode
     (".twig$"
      ".html?$"
@@ -910,18 +906,16 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
           web-mode-enable-auto-opening t
           web-mode-enable-auto-pairing nil
           web-mode-enable-auto-indentation t))
-  (use-package typescript-mode
-    :ensure t)
+  ;; Fallback for when tree-sitter grammar is not available
+  (use-package typescript-mode)
 #+end_src
 
 ** Flutter
 #+begin_src emacs-lisp
   ;;Flutter
-  (use-package dart-mode
-    :ensure t)
+  (use-package dart-mode)
 
   (use-package lsp-dart
-    :ensure t
     :after dart-mode
     :config (setq lsp-dart-dap-flutter-hot-reload-on-save  t))
 #+end_src
@@ -929,22 +923,19 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 ** Nix
 #+begin_src emacs-lisp
   ;;Nix
-  (use-package nix-mode
-    :ensure t)
+  (use-package nix-mode)
 #+end_src
 
 ** Meson
 #+begin_src emacs-lisp
   ;;Meson
-  (use-package meson-mode
-    :ensure t)
+  (use-package meson-mode)
 #+end_src
 
 ** LaTeX
 #+begin_src emacs-lisp
   ;;LaTeX
   (use-package auctex
-    :ensure t
     :defer t
     :hook (LaTeX-mode . (lambda ()
               (push (list 'output-pdf "Zathura")
@@ -956,8 +947,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 ** Rust
 #+begin_src emacs-lisp
   ;;Rust
-  (use-package rust-mode
-    :ensure t)
+  (use-package rust-mode)
 #+end_src
 
 * AI tools
@@ -978,7 +968,6 @@ Login to Copilot with ~copilot-login~. You can also check the status with ~copil
 
 #+begin_src emacs-lisp :tangle no
   (use-package copilot
-    :ensure t
     :hook (prog-mode . copilot-mode)
     :bind (:map copilot-completion-map
                 ("<tab>" . copilot-accept-completion)
@@ -989,7 +978,6 @@ Login to Copilot with ~copilot-login~. You can also check the status with ~copil
 Start chatting with ~copilot-chat-display~. Type your question in prompt, then press ~C-c C-c~ or ~C-c RET~. You may need to authenticate to GitHub. Follow instructions.
 #+begin_src emacs-lisp :tangle no
   (use-package copilot-chat
-    :ensure t
     :after (request org markdown-mode)
     :config
     (setq copilot-chat-frontend 'org))
@@ -1009,17 +997,14 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
-  (use-package pdf-tools
-    :ensure t)
+  (use-package pdf-tools)
   (add-to-list 'load-path "~/.emacs.d/dired-single")
   (with-eval-after-load 'dired
     (require 'dired-single))
 
   (use-package dired-ranger
-    :ensure t
     :defer t)
   (use-package dirvish
-    :ensure t
     :init
     (dirvish-override-dired-mode)
     :custom
@@ -1074,7 +1059,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 ** Vertico and friends
 #+begin_src emacs-lisp
   (use-package vertico
-    :ensure t
     :custom
     (vertico-count 13)
     (vertico-cycle nil)
@@ -1083,47 +1067,43 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (vertico-mode))
 
   (use-package savehist
+    :ensure nil
     :init
     (savehist-mode))
 
   (use-package recentf
+    :ensure nil
     :config
     (recentf-mode))
 
   (use-package orderless
-    :ensure t
     :custom
     (completion-styles '(orderless basic)))
 
   (use-package marginalia
-    :ensure t
     :bind (:map minibuffer-local-map
            ("C-<right>" . marginalia-cycle))
     :init
     (marginalia-mode))
 
   (use-package nerd-icons-completion
-    :ensure t
     :after (marginalia nerd-icons)
     :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
     :init
     (nerd-icons-completion-mode))
 
   (use-package consult
-    :ensure t
     :init
     (consult-customize
      consult-theme :preview-key '(:debounce 0.2 any)))
 
-  (use-package consult-projectile
-    :ensure t)
+  (use-package consult-projectile)
 #+end_src
 
 ** Ivy
 #+begin_src emacs-lisp :tangle no
   ;;ivy
   (use-package ivy
-    :ensure t
     :config
     (ivy-mode t)
     (setq ivy-use-virtual-buffers t)
@@ -1131,16 +1111,13 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (setq enable-recursive-minibuffers t))
 
   (use-package ivy-rich
-    :ensure t
     :after ivy
     :init (ivy-rich-mode t))
 
   (use-package counsel
-    :ensure t
     :config (counsel-mode t))
 
   (use-package ivy-prescient
-    :ensure t
     :after counsel
     :custom
     (ivy-prescient-enable-filtering nil)
@@ -1149,7 +1126,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (ivy-prescient-mode t))
 
   (use-package lsp-ivy
-    :ensure t
     :after lsp)
 #+end_src
 
@@ -1160,14 +1136,12 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 ** Embark
 #+begin_src emacs-lisp
   (use-package embark
-    :ensure t
     :bind (("C-." . embark-act)
            :map minibuffer-local-map
            ("C-c C-c" . embark-collect)
            ("C-c C-e" . embark-export)))
 
   (use-package embark-consult
-    :ensure t
     :after (embark consult)
     :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
@@ -1176,7 +1150,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;;projectile
   (use-package projectile
-    :ensure t
     :diminish projectile-mode
     :config (projectile-mode)
     :custom ((projectile-completion-system 'default))
@@ -1192,7 +1165,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;;treemacs
   (use-package treemacs
-    :ensure t
     :defer t
     :config
     (progn
@@ -1255,16 +1227,13 @@ This doesn't seem much better than just using a terminal on the side, but suppos
       (treemacs-fringe-indicator-mode 'always)))
 
     (use-package treemacs-evil
-      :after (treemacs evil)
-      :ensure t)
+      :after (treemacs evil))
 
     (use-package treemacs-projectile
-      :after (treemacs projectile)
-      :ensure t)
+      :after (treemacs projectile))
 
     (use-package treemacs-magit
-      :after (treemacs magit)
-      :ensure t)
+      :after (treemacs magit))
  
 #+end_src
 
@@ -1272,22 +1241,19 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;;vterm
   (use-package vterm
-    :ensure t
     :commands vterm
     :config
     (setq vterm-shell "zsh")
     (setq vterm-max-scrollback 10000))
 
   ;;eat
-  (use-package eat
-    :ensure t)
+  (use-package eat)
 #+end_src
 
 ** Calendar calfw
 #+begin_src emacs-lisp
 ;;org-mode calendar
 (use-package calfw-org
-  :ensure t
   :commands calfw-org-open-calendar
   :config
   ;; Ensure org-roam agenda files are loaded before calfw uses them
@@ -1305,15 +1271,12 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 ** Magit
 #+begin_src emacs-lisp
   ;;magit
-  (use-package magit
-    :ensure t)
+  (use-package magit)
 
   (use-package forge
-    :ensure t
     :after magit)
 
   (use-package magit-todos
-    :ensure t
     :after magit
     :config (magit-todos-mode))
 #+end_src
@@ -1322,7 +1285,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;;diff-hl - highlight uncommitted changes in the fringe
   (use-package diff-hl
-    :ensure t
     :hook ((prog-mode . diff-hl-mode)
            (dired-mode . diff-hl-dired-mode)
            (magit-post-refresh . diff-hl-magit-post-refresh))
@@ -1333,7 +1295,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 ** Docker
 #+begin_src emacs-lisp
   (use-package docker
-    :ensure t
     :bind ("C-c d" . docker))
 #+end_src
 
@@ -1341,7 +1302,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
 ;;whichKey
 (use-package which-key
-  :ensure t
   :defer 0
   :diminish which-key-mode
   :config
@@ -1353,7 +1313,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;;helpful - better help buffers with source code and references
   (use-package helpful
-    :ensure t
     :bind
     ([remap describe-function] . helpful-callable)
     ([remap describe-variable] . helpful-variable)
@@ -1365,7 +1324,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
 ;;commenting
 (use-package evil-nerd-commenter
-  :ensure t
   :bind ("C-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 
@@ -1373,7 +1331,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
 ;;Rainbow delimiters
 (use-package rainbow-delimiters
-  :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
@@ -1381,7 +1338,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
 ;;colorize color names
 (use-package rainbow-mode
-  :ensure t
   :config
   (setq rainbow-ansi-colors nil)
   (setq rainbow-x-colors nil))
@@ -1390,32 +1346,28 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 ** undo-fu
 #+begin_src emacs-lisp
   ;; Better undo
-  (use-package undo-fu
-    :ensure t)
+  (use-package undo-fu)
   (use-package undo-fu-session
-    :ensure t
+    :custom
+    (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+    (undo-fu-session-directory "~/.emacs.d/undo-history")
     :config
-    (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-  (undo-fu-session-global-mode)
-  (setq undo-fu-session-directory "~/.emacs.d/undo-history")
+    (undo-fu-session-global-mode))
 
-  ;;undo-tree
-  (use-package vundo
-    :ensure t)
+  ;; Visual undo tree
+  (use-package vundo)
 #+end_src
 
 ** Imenu-list
 #+begin_src emacs-lisp
   ;; imenu list for dinamic index
-  (use-package imenu-list
-    :ensure t)
+  (use-package imenu-list)
 #+end_src
 
 ** Zoom
 #+begin_src emacs-lisp
   ;; Resize splits
   (use-package zoom
-    :ensure t
     :custom
     (zoom-ignored-buffer-name-regexps '("^\\*lsp-"))
     (zoom-ignore-predicates '((lambda () (window-parameter nil 'window-side))))
@@ -1459,7 +1411,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+begin_src emacs-lisp
   ;; Ledger for finances 
   (use-package ledger-mode
-    :ensure t
     :config
     (defun ledger-mode-clean-buffer-after-save ()
       (when (eq major-mode 'ledger-mode)
@@ -1473,7 +1424,6 @@ modus-vivendi-tinted already distinguishes real vs unreal buffers natively via ~
 #+begin_src emacs-lisp :tangle no
   ;; Solaire mode
   (use-package solaire-mode
-    :ensure t
     :init (solaire-global-mode t))
 #+end_src
 
@@ -1481,7 +1431,6 @@ modus-vivendi-tinted already distinguishes real vs unreal buffers natively via ~
 Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/][systemcrafters' configuration]] for org presentations
 #+begin_src emacs-lisp
 (use-package org-present
-  :ensure t
   :commands org-present
   :config
   (defun my/org-present-prepare-slide (buffer-name heading)
@@ -1538,13 +1487,11 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 ** Elfeed
 #+begin_src emacs-lisp
   (use-package elfeed-org
-    :ensure t
     :defer t
     :init
     (setq rmh-elfeed-org-files '("~/.emacs.d/elfeed.org")))
 
   (use-package elfeed
-    :ensure t
     :commands (elfeed)
     :config
     (setq elfeed-db-directory "~/.elfeed")
