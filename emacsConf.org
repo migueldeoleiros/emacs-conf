@@ -109,11 +109,11 @@
     :ensure t
     :after evil
     :config
-    (general-create-definer efs/leader-keys
+    (general-create-definer my/leader-keys
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
       :global-prefix "M-SPC")
-    (efs/leader-keys
+    (my/leader-keys
       "C-s" '((lambda() (interactive)(set-input-method "spanish-prefix")) :which-key "change input method to spanish")
       "C-p" '((lambda() (interactive)(set-input-method "portuguese-prefix")) :which-key "change input method to portuguese")
       "C-j" '((lambda() (interactive)(set-input-method "japanese")) :which-key "change input method to japanese")
@@ -127,7 +127,7 @@
       "s" '(consult-grep :which-key "grep current directory")
       "/" '(consult-line :which-key "search in buffer")
       "i" '(imenu-list-minor-mode :which-key "dynamic index buffer")
-      "b" '(switch-to-buffer :which-key "buffer menu")
+      "b" '(consult-buffer :which-key "buffer menu")
       "k" '(kill-buffer :which-key "kill buffer")
       "C-k" '(kill-buffer-and-window :which-key "kill buffer and window")
       ))
@@ -367,7 +367,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 * Org-mode
 ** Font
 #+begin_src emacs-lisp
-  (defun efs/org-font-setup ()
+  (defun my/org-font-setup ()
     "Set faces for `org-mode' heading levels."
     (dolist (face '((org-level-1 . 1.2)
                     (org-level-2 . 1.1)
@@ -395,7 +395,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 ** Basic setup
 #+begin_src emacs-lisp
   ;;; ORG-MODE
-  (defun efs/org-mode-setup ()
+  (defun my/org-mode-setup ()
     "Set up `org-mode'."
     (org-indent-mode)
     (variable-pitch-mode 1)
@@ -404,7 +404,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
   (use-package org
     :ensure t
     :commands (org-capture org-agenda)
-    :hook (org-mode . efs/org-mode-setup)
+    :hook (org-mode . my/org-mode-setup)
     :bind (("C-c l" . org-store-link))
     :config
     (setq org-ellipsis " ▾")
@@ -436,7 +436,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
       '(("~/notes/20240707172055-archive.org" :maxlevel . 1)))
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-    (efs/org-font-setup))
+    (my/org-font-setup))
 
   (use-package evil-org
     :ensure t
@@ -558,7 +558,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 
 ** Look setup
 #+begin_src emacs-lisp
-  (defun efs/org-mode-visual-fill ()
+  (defun my/org-mode-visual-fill ()
     "Center text on `org-mode'."
     (setq visual-fill-column-width 120
           visual-fill-column-center-text t)
@@ -579,7 +579,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 
   (use-package visual-fill-column
     :ensure t
-    :hook (org-mode . efs/org-mode-visual-fill))
+    :hook (org-mode . my/org-mode-visual-fill))
 #+end_src
 
 ** code blocks
@@ -697,7 +697,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     :init
     (setq lsp-keymap-prefix "C-l")
     :commands (lsp lsp-deferred)
-    :hook (lsp-mode . efs/lsp-mode-setup)
+    :hook (lsp-mode . my/lsp-mode-setup)
     :bind
     (:map lsp-mode-map
           (("M-RET" . lsp-execute-code-action)))
@@ -730,7 +730,7 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
                    LaTeX-mode-hook))
       (add-hook hook #'lsp-deferred))
 
-  (defun efs/lsp-mode-setup ()
+  (defun my/lsp-mode-setup ()
     "Set up lsp mode."
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
@@ -815,10 +815,10 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
     (global-treesit-auto-mode))
 #+end_src
 ** Ocaml
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   ;;Ocaml
-  ;;(add-hook 'tuareg-mode-hook #'lsp-deferred)
-  ;;(add-hook 'caml-mode-hook #'lsp-deferred)
+  (add-hook 'tuareg-mode-hook #'lsp-deferred)
+  (add-hook 'caml-mode-hook #'lsp-deferred)
 #+end_src
 ** C/C++
 #+begin_src emacs-lisp
@@ -878,14 +878,14 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
 #+end_src
 
 ** Erlang
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   ;;Erlang
-  ;;(setq load-path (cons "/lib/erlang/lib/tools-3.5.2/emacs"
-  ;;load-path))
-  ;;(setq erlang-root-dir "/lib/erlang")
-  ;;(setq exec-path (cons "/lib/erlang/bin" exec-path))
-  ;;(require 'erlang-start)
-  ;;(require 'erlang-flymake)
+  (setq load-path (cons "/lib/erlang/lib/tools-3.5.2/emacs"
+  load-path))
+  (setq erlang-root-dir "/lib/erlang")
+  (setq exec-path (cons "/lib/erlang/bin" exec-path))
+  (require 'erlang-start)
+  (require 'erlang-flymake)
 #+end_src
 
 ** Web dev
@@ -1581,7 +1581,6 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   ;; set tab to 4 spaces
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 4)
-  (setq indent-line-function 'insert-tab)
   (setq c-default-style "linux")
   (setq c-basic-offset 4) 
   (c-set-offset 'comment-intro 0)
