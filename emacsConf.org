@@ -666,6 +666,18 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :config
     (evil-collection-init))
 
+  (use-package evil-surround
+    :ensure t
+    :after evil
+    :config (global-evil-surround-mode 1))
+
+  (use-package evil-snipe
+    :ensure t
+    :after evil
+    :config
+    (evil-snipe-mode 1)
+    (evil-snipe-override-mode 1))
+
   ;; Change cursor terminal
   (unless (display-graphic-p)
     (use-package evil-terminal-cursor-changer
