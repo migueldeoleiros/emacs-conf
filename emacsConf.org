@@ -1098,6 +1098,12 @@ This doesn't seem much better than just using a terminal on the side, but suppos
      consult-theme :preview-key '(:debounce 0.2 any)))
 
   (use-package consult-projectile)
+
+  (use-package consult-dir
+    :bind (("C-x C-d" . consult-dir)
+           :map minibuffer-local-completion-map
+           ("C-x C-d" . consult-dir)
+           ("C-x C-j" . consult-dir-jump-file)))
 #+end_src
 
 ** Ivy
@@ -1144,6 +1150,9 @@ This doesn't seem much better than just using a terminal on the side, but suppos
   (use-package embark-consult
     :after (embark consult)
     :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+  ;; wgrep - edit grep results in-place (consult-grep → embark-export → wgrep)
+  (use-package wgrep)
 #+end_src
 
 ** Projectile
