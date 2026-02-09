@@ -727,6 +727,14 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :init (global-flycheck-mode))
 #+end_src
 
+** apheleia
+#+begin_src emacs-lisp
+  ;;apheleia - auto-format on save (prettier, black, rustfmt, etc.)
+  (use-package apheleia
+    :ensure t
+    :init (apheleia-global-mode))
+#+end_src
+
 ** corfu
 #+begin_src emacs-lisp
   ;;corfu - in-buffer completion
