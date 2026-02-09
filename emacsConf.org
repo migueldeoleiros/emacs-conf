@@ -38,7 +38,11 @@
   (setq use-package-always-ensure t)
   (eval-when-compile (require 'use-package))
 
-  ;; diminish - hide minor modes from modeline (used by :diminish in use-package)
+#+end_src
+
+Hide minor modes from modeline (used by ~:diminish~ in use-package):
+#+begin_src emacs-lisp
+  ;;diminish
   (use-package diminish)
 #+end_src
 
@@ -81,8 +85,11 @@
   ;;; LANGUAGE SPELLING AND TYPING
   (setq default-input-method "spanish-prefix")
 
-  ;; Jinx - fast spell checker with multi-language support (requires libenchant)
-  ;; On non-NixOS systems with Nix installed, the Nix linker can't find system libs
+#+end_src
+
+Fast spell checker with multi-language support (requires libenchant). On non-NixOS systems with Nix installed, the Nix linker can't find system libs.
+#+begin_src emacs-lisp
+  ;;jinx
   (when (file-directory-p "/usr/lib")
     (setq jinx-flags '("-L/usr/lib")))
   (use-package jinx
@@ -542,8 +549,9 @@ Old font settings:
 #+end_src
 
 ** org-download
+Drag-and-drop and paste images into org files.
 #+begin_src emacs-lisp
-  ;; org-download - drag-and-drop and paste images into org files
+  ;;org-download
   (use-package org-download
     :after org
     :hook ((org-mode . org-download-enable)
@@ -752,8 +760,9 @@ Old font settings:
 #+end_src
 
 ** apheleia
+Auto-format on save (prettier, black, rustfmt, etc.).
 #+begin_src emacs-lisp
-  ;;apheleia - auto-format on save (prettier, black, rustfmt, etc.)
+  ;;apheleia
   (use-package apheleia
     :init (apheleia-global-mode))
 #+end_src
@@ -805,8 +814,9 @@ Old font settings:
   ;;; Language specific configurations
 #+end_src
 ** Tree-sitter
+Automatic grammar management via ~treesit-auto~. Grammars install on first use via prompt.
 #+begin_src emacs-lisp
-  ;;tree-sitter automatic grammar management
+  ;;treesit-auto
   (use-package treesit-auto
     :custom
     (treesit-auto-install 'prompt)
@@ -906,7 +916,11 @@ Old font settings:
           web-mode-enable-auto-opening t
           web-mode-enable-auto-pairing nil
           web-mode-enable-auto-indentation t))
-  ;; Fallback for when tree-sitter grammar is not available
+#+end_src
+
+Fallback for when tree-sitter grammar is not available:
+#+begin_src emacs-lisp
+  ;;typescript
   (use-package typescript-mode)
 #+end_src
 
@@ -1150,8 +1164,11 @@ This doesn't seem much better than just using a terminal on the side, but suppos
   (use-package embark-consult
     :after (embark consult)
     :hook (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
 
-  ;; wgrep - edit grep results in-place (consult-grep → embark-export → wgrep)
+Edit grep results in-place. Workflow: ~consult-grep~ → ~embark-export~ (~C-c C-e~) → edit matches → ~C-c C-c~ to apply.
+#+begin_src emacs-lisp
+  ;;wgrep
   (use-package wgrep)
 #+end_src
 
@@ -1291,8 +1308,9 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+end_src
 
 ** diff-hl
+Highlight uncommitted changes in the fringe.
 #+begin_src emacs-lisp
-  ;;diff-hl - highlight uncommitted changes in the fringe
+  ;;diff-hl
   (use-package diff-hl
     :hook ((prog-mode . diff-hl-mode)
            (dired-mode . diff-hl-dired-mode)
@@ -1319,8 +1337,9 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+end_src
 
 ** Helpful
+Better help buffers with source code and references.
 #+begin_src emacs-lisp
-  ;;helpful - better help buffers with source code and references
+  ;;helpful
   (use-package helpful
     :bind
     ([remap describe-function] . helpful-callable)
