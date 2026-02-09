@@ -1413,9 +1413,20 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 
 ** Zoom
 #+begin_src emacs-lisp
-  ;; Resize splits 
+  ;; Resize splits
   (use-package zoom
     :ensure t
+    :custom
+    (zoom-ignored-buffer-name-regexps '("^\\*lsp-"))
+    (zoom-ignore-predicates '((lambda () (window-parameter nil 'window-side))))
+    :config
+    ;; Skip zoom entirely when popup windows are visible so they keep their content-fitted size
+    (advice-add 'zoom--update :around
+                (lambda (orig-fun &rest args)
+                  (unless (or (get-buffer-window " *which-key*")
+                              (get-buffer-window " *transient*")
+                              (get-buffer-window "*vundo-tree*"))
+                    (apply orig-fun args))))
     :init (zoom-mode t))
 
   (defvar my/buffer-configurations
