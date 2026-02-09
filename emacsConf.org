@@ -1300,7 +1300,19 @@ This doesn't seem much better than just using a terminal on the side, but suppos
   (setq which-key-idle-delay 1))
 #+end_src
 
-** Commenter 
+** Helpful
+#+begin_src emacs-lisp
+  ;;helpful - better help buffers with source code and references
+  (use-package helpful
+    :ensure t
+    :bind
+    ([remap describe-function] . helpful-callable)
+    ([remap describe-variable] . helpful-variable)
+    ([remap describe-key] . helpful-key)
+    ([remap describe-command] . helpful-command))
+#+end_src
+
+** Commenter
 #+begin_src emacs-lisp
 ;;commenting
 (use-package evil-nerd-commenter
