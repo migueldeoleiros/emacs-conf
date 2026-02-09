@@ -1290,6 +1290,10 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     :ensure t
     :after magit)
 
+  (use-package magit-todos
+    :ensure t
+    :after magit
+    :config (magit-todos-mode))
 #+end_src
 
 ** Git-gutter
