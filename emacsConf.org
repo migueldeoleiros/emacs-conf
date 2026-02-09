@@ -184,7 +184,7 @@
     :custom ((doom-modeline-height 28)))
 #+end_src
 
-Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro Nerd Font is set as default).
+Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Nerd Font is set as default).
 #+begin_src emacs-lisp
   ;;icons
   (use-package nerd-icons
@@ -1469,8 +1469,9 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 #+end_src
 
 ** Solaire mode
-#+begin_src emacs-lisp
-  ;; Solaire mode 
+modus-vivendi-tinted already distinguishes real vs unreal buffers natively via ~bg-main~ / ~bg-dim~ palette overrides. Solaire conflicts with this.
+#+begin_src emacs-lisp :tangle no
+  ;; Solaire mode
   (use-package solaire-mode
     :ensure t
     :init (solaire-global-mode t))
