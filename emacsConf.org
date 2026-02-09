@@ -676,6 +676,9 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
           (("M-RET" . lsp-execute-code-action)))
     :config
     (lsp-enable-which-key-integration t)
+    (add-hook 'lsp-mode-hook #'lsp-lens-mode)
+    (setq lsp-keep-workspace-alive nil)
+    (setq lsp-modeline-diagnostics-scope :project)
     (setq lsp-file-watch-threshold 5000)
     (dolist (dir '("[/\\\\]\\.emacs\\.d\\'"
                    "[/\\\\]elpa\\'"
@@ -721,23 +724,30 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
     :init (global-flycheck-mode))
 #+end_src
 
-** company
+** corfu
 #+begin_src emacs-lisp
-  ;;company
-  (use-package company
+  ;;corfu - in-buffer completion
+  (use-package corfu
     :ensure t
-    :after lsp-mode
-    :hook (lsp-mode . company-mode)
-    :bind (:map company-active-map
-            ("<tab>" . company-complete-selection))
-          (:map lsp-mode-map
-            ("<tab>" . company-indent-or-complete-common))
     :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0))
-  (use-package company-box
+    (corfu-auto t)
+    (corfu-auto-delay 0.0)
+    (corfu-auto-prefix 1)
+    (corfu-cycle t)
+    :init
+    (global-corfu-mode))
+
+  (use-package nerd-icons-corfu
     :ensure t
-    :hook (company-mode . company-box-mode))
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+  (use-package cape
+    :ensure t
+    :init
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev))
 #+end_src
 
 ** snippets
@@ -749,19 +759,6 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
   (use-package yasnippet-snippets
     :ensure t)
 
-  ;; fix yasnippet conflicts
-  (with-eval-after-load 'company
-    (defun company-yasnippet-or-completion ()
-      "Use Yasnippet or fall back to company completion."
-      (interactive)
-      (unless (yas-maybe-expand-abbrev-key-filter 'yas-triggers-in-field)
-        (call-interactively #'company-complete-common)))
-
-    (add-hook 'company-mode-hook
-              (lambda ()
-                (substitute-key-definition 'company-complete-common
-                                           'company-yasnippet-or-completion
-                                            company-active-map))))
 #+end_src
 
 * Language setup
@@ -807,24 +804,21 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
   ;;Java
   (use-package lsp-java
     :ensure t
+    :hook ((java-mode . lsp-deferred)
+           (java-ts-mode . lsp-deferred))
+    :custom
+    (lsp-java-configuration-maven-user-settings (expand-file-name "~/.m2/settings.xml"))
     :config
-    (add-hook 'java-mode-hook 'lsp)
-    (add-hook 'java-ts-mode-hook 'lsp)
+    (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
+    (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
     (dolist (dir '("[/\\\\]target\\'"
                    "[/\\\\]\\.gradle\\'"
-                   "[/\\\\]build\\'"))
+                   "[/\\\\]build\\'"
+                   "[/\\\\]bin\\'"))
       (add-to-list 'lsp-file-watch-ignored-directories dir)))
-  ;; to enable the lenses
-  (add-hook 'lsp-mode-hook #'lsp-lens-mode)
-  (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
-  (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
-
-  (setq lsp-java-configuration-maven-user-settings "/home/miguel/.m2/settings.xml")
-  (setq lsp-java-autobuild-enabled t)
-  (setq lsp-java-completion-enabled t)
 
   (with-eval-after-load 'lsp-java
-    (setq lombok-library-path (concat "/home/miguel/.m2/lombok.jar"))
+    (setq lombok-library-path (expand-file-name "~/.m2/lombok.jar"))
 
     (unless (file-exists-p lombok-library-path)
       (url-copy-file "https://projectlombok.org/downloads/lombok.jar" lombok-library-path))
@@ -833,8 +827,7 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
 
     (push (concat "-javaagent:"
                     (expand-file-name lombok-library-path))
-            lsp-java-vmargs)
-  )
+            lsp-java-vmargs))
 #+end_src
 
 ** Python
@@ -931,7 +924,6 @@ Icons use Nerd Fonts — make sure you have a Nerd Font installed (SauceCodePro 
               (push (list 'output-pdf "Zathura")
                     TeX-view-program-selection))))
 
-  (add-hook 'LaTeX-mode-hook 'company-mode)
   (setq exec-path (append exec-path '("/usr/local/texlive/")))
 #+end_src
 
@@ -1407,12 +1399,7 @@ This doesn't seem much better than just using a terminal on the side, but suppos
       (when (eq major-mode 'ledger-mode)
         (ledger-mode-clean-buffer)))
 
-    (add-hook 'after-save-hook 'ledger-mode-clean-buffer-after-save)
-    (add-hook 'ledger-mode-hook 'company-mode))
-
-  (use-package company-ledger
-    :ensure t
-    :after ledger-mode)
+    (add-hook 'after-save-hook 'ledger-mode-clean-buffer-after-save))
 #+end_src
 
 ** Solaire mode
