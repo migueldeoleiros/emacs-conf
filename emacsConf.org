@@ -511,7 +511,26 @@ Old font settings:
              :target (file+head "%<%Y-%m-%d>.org"
                                 "#+title: %<%Y-%m-%d>\n#+filetags: journal\n#+hugo_tags: noexport\n \nLinks: [[id:756fbf4c-a9b6-4a52-b512-bd39842029a1][journal]] \n "))))
     (require 'org-roam-export)
-    (require 'org-roam-protocol))
+    (require 'org-roam-protocol)
+
+    (defun my/send-subtree-to-journal ()
+      "Append the current org subtree to today's journal daily."
+      (interactive)
+      (require 'org-roam-dailies)
+      (org-back-to-heading t)
+      (let ((subtree-text (buffer-substring-no-properties
+                           (point)
+                           (save-excursion (org-end-of-subtree t t) (point)))))
+        (save-window-excursion
+          (org-roam-dailies-goto-today)
+          (goto-char (point-max))
+          (unless (bolp) (insert "\n"))
+          (insert subtree-text)
+          (unless (bolp) (insert "\n"))
+          (save-buffer))
+        (message "Subtree sent to today's journal")))
+
+    (define-key org-roam-dailies-map (kbd "m") #'my/send-subtree-to-journal))
   (use-package org-roam-ui
     :after org-roam)
 
@@ -1576,6 +1595,59 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
               (lambda () (setq-local browse-url-browser-function #'eww-browse-url))))
 #+end_src
 
+* Scratch buffer
+#+begin_src emacs-lisp
+  ;; org-mode scratch buffer with dynamic keybindings
+  (setq initial-major-mode 'org-mode)
+  (setq initial-scratch-message nil)
+
+  (defvar my/scratch-keybinds
+    '((find-file            . "find and open a file")
+      (org-roam-node-find   . "search org-roam notes")
+      (consult-recent-file  . "open a recent file")
+      (consult-buffer       . "switch between buffers"))
+    "Commands and labels shown in the scratch buffer.")
+
+  (defun my/lookup-keybind (cmd)
+    "Return a human-readable key string for CMD."
+    (let ((key (or (and (boundp 'evil-normal-state-map)
+                        (where-is-internal cmd evil-normal-state-map t))
+                   (where-is-internal cmd nil t))))
+      (when key (key-description key))))
+
+  (defun my/generate-scratch-message ()
+    "Generate org-mode scratch content with dynamic keybindings."
+    (let ((entries (mapcar (lambda (entry)
+                             (let ((key (or (my/lookup-keybind (car entry)) "???"))
+                                   (cmd-name (symbol-name (car entry))))
+                               (list key cmd-name (cdr entry))))
+                           my/scratch-keybinds)))
+      (concat
+       "\n* Scratch\n"
+       (format "  /%s/\n\n" (format-time-string "%A, %d %B %Y"))
+       (mapconcat
+        (lambda (entry)
+          (format "| ~%s~ | ~M-x %s~ | %s |"
+                  (nth 0 entry) (nth 1 entry) (nth 2 entry)))
+        entries "\n")
+       "\n\n** Notes\n")))
+
+  (defun my/setup-scratch-buffer ()
+    "Populate the scratch buffer with org content and keybinding info."
+    (with-current-buffer "*scratch*"
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (org-mode)
+        (insert (my/generate-scratch-message))
+        (goto-char (point-min))
+        (while (re-search-forward "^|" nil t)
+          (org-table-align))
+        (goto-char (point-max))
+        (set-buffer-modified-p nil))))
+
+  (add-hook 'emacs-startup-hook #'my/setup-scratch-buffer)
+
+#+end_src
 * Other configs
 #+begin_src emacs-lisp
   ;;; Other configurations
@@ -1627,3 +1699,4 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
                         (url-hexify-string url))))
 
 #+end_src
+
