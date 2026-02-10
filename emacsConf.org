@@ -5,16 +5,37 @@
 #+begin_src emacs-lisp
   ;; -*- lexical-binding: t; -*-
 #+end_src
-** Garbage collection
-#+begin_src emacs-lisp 
+** early-init.el
+Runs before ~init.el~ and before the first frame is drawn. Disabling GUI elements here avoids the flash of default toolbars/scrollbars.
+#+begin_src emacs-lisp :tangle early-init.el
+  ;; -*- lexical-binding: t; -*-
+
   ;; Minimize garbage collection during startup
   (setq gc-cons-threshold most-positive-fixnum)
 
-  ;; Lower threshold after startup (100MB for LSP performance)
+  ;; Disable GUI elements before frame is drawn
+  (setq inhibit-startup-message t)
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
+  (push '(tooltip-mode . -1) default-frame-alist)
+
+  ;; Prevent package.el from loading packages before init.el
+  (setq package-enable-at-startup nil)
+#+end_src
+
+** Garbage collection and startup
+#+begin_src emacs-lisp
+  ;; Temporarily disable file-name-handler-alist for faster startup
+  (defvar my/default-file-name-handler-alist file-name-handler-alist)
+  (setq file-name-handler-alist nil)
+
+  ;; Restore after startup (100MB GC threshold for LSP performance)
   (add-hook 'emacs-startup-hook
             (lambda()
               (setq gc-cons-threshold (* 100 1024 1024))
-              (setq read-process-output-max (* 1024 1024))))
+              (setq read-process-output-max (* 1024 1024))
+              (setq file-name-handler-alist my/default-file-name-handler-alist)))
 #+end_src
 
 * Package management 
@@ -65,7 +86,8 @@ Hide minor modes from modeline (used by ~:diminish~ in use-package):
 #+end_src
 
 ** Package update
-#+begin_src emacs-lisp 
+Deferred to idle time so it doesn't block startup.
+#+begin_src emacs-lisp
   ;;; PACKAGE UPDATE
   (use-package auto-package-update
     :custom
@@ -73,8 +95,7 @@ Hide minor modes from modeline (used by ~:diminish~ in use-package):
     (auto-package-update-prompt-before-update t)
     (auto-package-update-hide-results t)
     :config
-    (auto-package-update-maybe)
-    (auto-package-update-at-time "09:00"))
+    (run-with-idle-timer 30 nil #'auto-package-update-maybe))
 #+end_src
 
 * Language spelling and typing 
@@ -136,13 +157,7 @@ Fast spell checker with multi-language support (requires libenchant). On non-Nix
 ** basic UI setup
 #+begin_src emacs-lisp
   ;;; UI
-  (setq inhibit-startup-message t)
-
-  (scroll-bar-mode -1)        ; Disable visible scrollbar
-  (tool-bar-mode -1)          ; Disable the toolbar
-  (tooltip-mode -1)           ; Disable tooltips
   (set-fringe-mode 10)        ; Give some breathing room
-  (menu-bar-mode -1)          ; Disable the menu bar
 
   ;; Set up the visible bell
   (setq visible-bell t)
@@ -762,7 +777,7 @@ Drag-and-drop and paste images into org files.
 #+begin_src emacs-lisp
   ;;flycheck
   (use-package flycheck
-    :init (global-flycheck-mode))
+    :hook (prog-mode . flycheck-mode))
 #+end_src
 
 ** apheleia
@@ -812,7 +827,7 @@ Auto-format on save (prettier, black, rustfmt, etc.).
 #+begin_src emacs-lisp
   ;;yasnippet
   (use-package yasnippet
-    :config (yas-global-mode))
+    :hook (prog-mode . yas-minor-mode))
   (use-package yasnippet-snippets)
 
 #+end_src
