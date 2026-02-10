@@ -192,6 +192,15 @@ Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Ner
   ;;icons
   (use-package nerd-icons)
 #+end_src
+** Pulsar
+Brief pulse highlight on cursor jumps. By Prot (modus-themes author).
+#+begin_src emacs-lisp
+  ;;pulsar
+  (use-package pulsar
+    :config
+    (pulsar-global-mode))
+#+end_src
+
 ** Theme
 #+begin_src emacs-lisp
   ;;; THEME
@@ -786,6 +795,8 @@ Auto-format on save (prettier, black, rustfmt, etc.).
                     elfeed-show-mode-hook))
       (add-hook hook #'my/corfu-disable-auto)))
 
+  (corfu-popupinfo-mode)
+
   (use-package nerd-icons-corfu
     :after corfu
     :config
@@ -820,6 +831,15 @@ Automatic grammar management via ~treesit-auto~. Grammars install on first use v
     :config
     (treesit-auto-add-to-auto-mode-alist 'all)
     (global-treesit-auto-mode))
+#+end_src
+** indent-bars
+Tree-sitter aware indentation guide lines.
+#+begin_src emacs-lisp
+  ;;indent-bars
+  (use-package indent-bars
+    :hook (prog-mode . indent-bars-mode)
+    :custom
+    (indent-bars-treesit-support t))
 #+end_src
 ** Ocaml
 #+begin_src emacs-lisp :tangle no
