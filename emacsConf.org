@@ -28,15 +28,12 @@
 #+end_src
 
 ** Bootstrap use-package
-#+begin_src emacs-lisp 
+~use-package~ is built-in since Emacs 29.
+#+begin_src emacs-lisp
   ;;; BOOTSTRAP USE-PACKAGES
   (package-initialize)
-  (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
-  (eval-when-compile (require 'use-package))
 
 #+end_src
 
@@ -1326,10 +1323,11 @@ Highlight uncommitted changes in the fringe.
 #+end_src
 
 ** WhichKey
+Built-in since Emacs 30.
 #+begin_src emacs-lisp
 ;;whichKey
 (use-package which-key
-  :defer 0
+  :ensure nil
   :diminish which-key-mode
   :config
   (which-key-mode)
@@ -1552,6 +1550,7 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
         scroll-step 1
         scroll-conservatively 10000
         scroll-preserve-screen-position 1)
+  (pixel-scroll-precision-mode)
 
   ;; set tab to 4 spaces
   (setq-default indent-tabs-mode nil)
