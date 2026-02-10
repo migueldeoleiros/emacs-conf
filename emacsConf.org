@@ -443,10 +443,10 @@ Old font settings:
       '((sequence "TODO(t)" "PROG(p)" "|" "DONE(d)" "CANCELED(c)")))
 
     (setq org-todo-keyword-faces
-      '(("TODO" . (:foreground "white" :background "red" :weight bold))
-        ("PROG" . (:foreground "black" :background "yellow" :weight bold))
-        ("DONE" . (:foreground "black" :background "green" :weight bold))
-        ("CANCELED" . (:foreground "white" :background "#4d4d4d" :weight bold))))
+      `(("TODO"     . (:foreground ,(modus-themes-get-color-value 'bg-main) :background ,(modus-themes-get-color-value 'red) :weight bold))
+        ("PROG"     . (:foreground ,(modus-themes-get-color-value 'bg-main) :background ,(modus-themes-get-color-value 'yellow) :weight bold))
+        ("DONE"     . (:foreground ,(modus-themes-get-color-value 'bg-main) :background ,(modus-themes-get-color-value 'green) :weight bold))
+        ("CANCELED" . (:foreground ,(modus-themes-get-color-value 'bg-main) :background ,(modus-themes-get-color-value 'fg-dim) :weight bold))))
 
     (setq org-agenda-custom-commands
       '(("n" "Custom Agenda with TODOs"
@@ -610,17 +610,10 @@ Drag-and-drop and paste images into org files.
           visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
-  (use-package org-modern
-    :hook (org-mode . org-modern-mode)
+  (use-package org-superstar
+    :hook (org-mode . org-superstar-mode)
     :custom
-    (org-modern-star '("●" "○" "◆" "◇" "●" "○" "◆"))
-    (org-modern-table nil)
-    (org-modern-block-fringe nil)
-    (org-modern-block-name nil)
-    :config
-    (set-face-attribute 'org-modern-label nil :height 1.0 :width 'regular)
-    (set-face-attribute 'org-modern-todo nil :inverse-video nil)
-    (set-face-attribute 'org-modern-done nil :inverse-video nil))
+    (org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "●" "○" "◆")))
 
   (use-package visual-fill-column
     :hook (org-mode . my/org-mode-visual-fill))
