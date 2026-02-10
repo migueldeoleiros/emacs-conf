@@ -1008,26 +1008,18 @@ This doesn't seem much better than just using a terminal on the side, but suppos
 * Dired
 #+begin_src emacs-lisp
   ;;;DIRED
-  (use-package pdf-tools)
-  (add-to-list 'load-path "~/.emacs.d/dired-single")
-  (with-eval-after-load 'dired
-    (require 'dired-single))
-
-  (use-package dired-ranger
-    :defer t)
   (use-package dirvish
     :init
     (dirvish-override-dired-mode)
     :custom
-    (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+    (dired-kill-when-opening-new-dired-buffer t)
+    (dirvish-quick-access-entries
      '(("h" "~/"                          "Home")
        ("d" "~/downloads/"                "Downloads")
        ("u" "/universidad/"               "Universidad")
        ("i" "/igalia/"                    "Igalia")
        ("t" "~/.local/share/Trash/files/" "TrashCan")))
     :config
-    ;; (dirvish-peek-mode) ; Preview files in minibuffer
-    ;; (dirvish-side-follow-mode) ; similar to `treemacs-follow-mode'
     (evil-make-overriding-map dirvish-mode-map 'normal)
     (setq dirvish-reuse-session t)
     (setq dired-mouse-drag-files t)
@@ -1035,28 +1027,26 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (setq dirvish-mode-line-format
           '(:left (sort symlink) :right (omit yank index)))
     (setq dirvish-attributes
-          '(nerd-icons file-size collapse subtree-state))
+          '(vc-state nerd-icons file-size collapse subtree-state))
     (setq delete-by-moving-to-trash t)
     (setq dired-listing-switches
           "-l --almost-all --human-readable --group-directories-first --no-group")
-    (setq dirvish-open-with-programs 
+    (setq dirvish-open-with-programs
       (append dirvish-open-with-programs '(
         (("xlsx" "docx" "doc" "odt" "ods") "libreoffice" "%f")
         (("jpg" "jpeg" "png")              "eog" "%f")
         (("pdf")                           "zathura" "%f"))))
-    :bind ; Bind `dirvish|dirvish-side|dirvish-dwim' as you see fit
+    :bind
     (("C-c f" . dirvish-fd)
-     :map dirvish-mode-map ; Dirvish inherits `dired-mode-map'
-     ("h"   . dired-single-up-directory)
+     :map dirvish-mode-map
+     ("h"   . dired-up-directory)
      ("j"   . dired-next-line)
      ("k"   . dired-previous-line)
-     ("l"   . dired-single-buffer)
+     ("l"   . dired-find-file)
      ("q"   . dirvish-quit)
      ("f"   . dirvish-file-info-menu)
      ("y"   . dirvish-yank-menu)
      ("N"   . dirvish-narrow)
-     ("X"   . dired-ranger-move)
-     ("p"   . dired-ranger-paste)
      ("TAB" . dirvish-subtree-toggle)
      ("C-a" . dirvish-quick-access)
      ("C-f" . dirvish-fd-jump)
@@ -1064,6 +1054,18 @@ This doesn't seem much better than just using a terminal on the side, but suppos
      ("C-c d" . make-directory)
      ("C-c m" . dirvish-mark-menu)
      ("M-c e" . dirvish-emerge-menu)))
+#+end_src
+
+~dirvish-peek-mode~ previews files in the minibuffer, ~dirvish-side-follow-mode~ works like ~treemacs-follow-mode~:
+#+begin_src emacs-lisp :tangle no
+  (dirvish-peek-mode)
+  (dirvish-side-follow-mode)
+#+end_src
+
+** pdf-tools
+#+begin_src emacs-lisp
+  ;;pdf-tools
+  (use-package pdf-tools)
 #+end_src
 
 * Minibuffer completion
@@ -1306,11 +1308,12 @@ Edit grep results in-place. Workflow: ~consult-grep~ → ~embark-export~ (~C-c C
 
 ** diff-hl
 Highlight uncommitted changes in the fringe.
+Dired hook disabled in favor of dirvish's ~vc-state~ attribute.
 #+begin_src emacs-lisp
   ;;diff-hl
   (use-package diff-hl
     :hook ((prog-mode . diff-hl-mode)
-           (dired-mode . diff-hl-dired-mode)
+           ;; (dired-mode . diff-hl-dired-mode) ; using dirvish vc-state instead
            (magit-post-refresh . diff-hl-magit-post-refresh))
     :config
     (diff-hl-flydiff-mode))
