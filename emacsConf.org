@@ -195,11 +195,67 @@ Spacious padding workaround for emacsclient:
                   eat-mode-hook
                   eshell-mode-hook))
       (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+end_src
 
-  ;;modeline
-  (use-package doom-modeline
-    :init (doom-modeline-mode 1)
-    :custom ((doom-modeline-height 28)))
+** Modeline
+Custom modeline inspired by doom-modeline.
+Evil state indicator with colored backgrounds, buffer name that highlights on focus and changes color for unsaved changes, major mode right-aligned, and icons.
+#+begin_src emacs-lisp
+  ;; evil state indicator
+  (defun my/modeline-evil-state ()
+    "Evil state indicator with colored background."
+    (when (and (mode-line-window-selected-p)
+               (bound-and-true-p evil-local-mode))
+      (let ((bg (face-attribute 'default :background)))
+        (pcase evil-state
+          ('normal   (propertize "  NORMAL  "   'face `(:background "#61afef" :foreground ,bg :weight bold)))
+          ('insert   (propertize "  INSERT  "   'face `(:background "#98c379" :foreground ,bg :weight bold)))
+          ('visual   (propertize "  VISUAL  "   'face `(:background "#c678dd" :foreground ,bg :weight bold)))
+          ('replace  (propertize "  REPLACE  "  'face `(:background "#e06c75" :foreground ,bg :weight bold)))
+          ('motion   (propertize "  MOTION  "   'face `(:background "#d19a66" :foreground ,bg :weight bold)))
+          ('operator (propertize "  OPERATOR  " 'face `(:background "#56b6c2" :foreground ,bg :weight bold)))
+          ('emacs    (propertize "  EMACS  "    'face `(:background "#be5046" :foreground ,bg :weight bold)))))))
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; buffer name: icon + bold when active, colored when modified
+  (defun my/modeline-buffer-name ()
+    (let ((icon (nerd-icons-icon-for-buffer))
+          (name (buffer-name)))
+      (concat
+       " " icon
+       (if (mode-line-window-selected-p)
+           (propertize (concat " " name " ") 'face
+             (cond ((buffer-modified-p) '(:inherit warning :weight bold))
+                   (buffer-read-only '(:inherit shadow :weight bold))
+                   (t '(:weight bold))))
+         (concat " " name " ")))))
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; vc branch with git icon
+  (defun my/modeline-vc ()
+    (when vc-mode
+      (concat (nerd-icons-octicon "nf-oct-git_branch")
+              (string-trim (replace-regexp-in-string "^ Git[:-]" " " vc-mode)))))
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; mode-line format
+  (setq-default mode-line-format
+    '("%e"
+      (:eval (my/modeline-evil-state))
+      "  "
+      (:eval (my/modeline-buffer-name))
+      "   "
+      (:eval (my/modeline-vc))
+      mode-line-format-right-align
+      mode-line-misc-info
+      "  "
+      "%l:%c"
+      "  "
+      (:eval mode-name)
+      "  "))
 #+end_src
 
 Icons use Nerd Fonts, make sure you have a Nerd Font installed (SauceCodePro Nerd Font is set as default).
@@ -738,6 +794,8 @@ Drag-and-drop and paste images into org files.
     (setq evil-want-integration t)
     ;; no vim insert bindings
     (setq evil-undo-system 'undo-fu)
+    (setq evil-echo-state nil)
+    (setq evil-mode-line-format nil)
     :config
     (evil-mode t)
     (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
