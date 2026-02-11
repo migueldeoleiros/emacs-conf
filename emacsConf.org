@@ -345,11 +345,11 @@ Briefly highlights the affected region on evil operations
           (bg-char-1 bg-magenta-subtle)
           (bg-char-2 bg-yellow-subtle)
 
-          (bg-mode-line-active        gray)
-          (fg-mode-line-active        whiteish)
+          (bg-mode-line-active        gray-faint)
+          (fg-mode-line-active        light-gray)
           (border-mode-line-active    unspecified)
-          (bg-mode-line-inactive      gray-faint)
-          (fg-mode-line-inactive      light-gray)
+          (bg-mode-line-inactive      gray)
+          (fg-mode-line-inactive      whiteish)
           (border-mode-line-inactive  unspecified)
 
           (modeline-err     red-faint)
