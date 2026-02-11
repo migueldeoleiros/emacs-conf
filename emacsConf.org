@@ -150,6 +150,7 @@ Fast spell checker with multi-language support (requires libenchant). On non-Nix
       "b" '(consult-buffer :which-key "buffer menu")
       "k" '(kill-buffer :which-key "kill buffer")
       "C-k" '(kill-buffer-and-window :which-key "kill buffer and window")
+      "e" '(elfeed :which-key "elfeed")
       ))
 #+end_src
 
@@ -271,7 +272,6 @@ Brief pulse highlight on cursor jumps. By Prot (modus-themes author).
     :config
     (pulsar-global-mode))
 #+end_src
-
 
 ** Evil-goggles
 Briefly highlights the affected region on evil operations
@@ -1364,7 +1364,8 @@ Custom "Open With..." embark action (~C-. X~ on a file). Uses XDG desktop entrie
                        t t))
                  (args (split-string-shell-command cmd)))
             (apply #'start-process (car args) nil args)))))
-    (define-key embark-file-map "X" #'my/embark-open-with))
+    (define-key embark-file-map "X" #'my/embark-open-with)
+    (define-key embark-identifier-map "z" #'jinx-correct))
 #+end_src
 
 Edit grep results in-place. Workflow: ~consult-grep~ → ~embark-export~ (~C-c C-e~) → edit matches → ~C-c C-c~ to apply.
