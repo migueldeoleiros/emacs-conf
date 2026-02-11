@@ -173,7 +173,7 @@ Fast spell checker with multi-language support (requires libenchant). On non-Nix
 #+end_src
 
 Spacious padding workaround for emacsclient:
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (use-package spacious-padding
     :config (spacious-padding-mode 1))
   (defun bs-sp-workaround ()
