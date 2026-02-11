@@ -219,6 +219,28 @@ Brief pulse highlight on cursor jumps. By Prot (modus-themes author).
 ** Theme
 #+begin_src emacs-lisp
   ;;; THEME
+  ;; Custom palette - shared between modus-themes and custom faces
+  (defvar my/palette
+    '((bg-main          "#0f0f0f")
+      (bg-dim           "#191919")
+      (fg-main          "#ffffff")
+      (fg-dim           "#b9b9b9")
+      (fg-alt           "#e0e0e0")
+      (bg-active        "#4b4b4b")
+      (bg-inactive      "#2d2d2d")
+      (border           "#2d2d2d")
+
+      (gray            "#191919")
+      (gray-faint      "#2d2d2d")
+      (gray-light      "#4b4b4b")
+      (whiteish        "#e0e0e0")
+      (light-gray      "#b9b9b9"))
+    "My custom color palette with direct hex values.")
+
+  (defun my/color (name)
+    "Get hex color NAME from `my/palette'."
+    (cadr (assq name my/palette)))
+
   ;; Customizations prior to loading the themes
   (use-package modus-themes
     :init
@@ -230,21 +252,21 @@ Brief pulse highlight on cursor jumps. By Prot (modus-themes author).
           modus-themes-org-blocks 'gray-background)
 
     (setq modus-vivendi-tinted-palette-overrides
-          '(
-          (bg-main          "#0f0f0f")
-          (bg-dim           "#191919")
-          (fg-main          "#ffffff")
-          (fg-dim           "#b9b9b9")
-          (fg-alt           "#e0e0e0")
-          (bg-active        "#4b4b4b")
-          (bg-inactive      "#2d2d2d")
-          (border           "#2d2d2d")
+          `(
+          (bg-main          ,(my/color 'bg-main))
+          (bg-dim           ,(my/color 'bg-dim))
+          (fg-main          ,(my/color 'fg-main))
+          (fg-dim           ,(my/color 'fg-dim))
+          (fg-alt           ,(my/color 'fg-alt))
+          (bg-active        ,(my/color 'bg-active))
+          (bg-inactive      ,(my/color 'bg-inactive))
+          (border           ,(my/color 'border))
 
-          (gray            "#191919")
-          (gray-faint      "#2d2d2d")
-          (gray-light      "#4b4b4b")
-          (whiteish        "#e0e0e0")
-          (light-gray      "#b9b9b9")
+          (gray            ,(my/color 'gray))
+          (gray-faint      ,(my/color 'gray-faint))
+          (gray-light      ,(my/color 'gray-light))
+          (whiteish        ,(my/color 'whiteish))
+          (light-gray      ,(my/color 'light-gray))
 
 
           (bg-completion       bg-blue-subtle)
@@ -466,6 +488,34 @@ Old font settings:
       '(("~/notes/20240707172055-archive.org" :maxlevel . 1)))
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
+    ;; Agenda date faces - add a subtle background to day titles
+    (set-face-attribute 'org-agenda-date nil
+      :foreground (my/color 'fg-main) :background (my/color 'bg-inactive)
+      :weight 'bold :extend t)
+    (set-face-attribute 'org-agenda-date-today nil
+      :foreground (modus-themes-get-color-value 'cyan-faint) :background (my/color 'gray)
+      :weight 'bold :extend t)
+    (set-face-attribute 'org-agenda-date-weekend nil
+      :foreground (modus-themes-get-color-value 'magenta-faint) :background (my/color 'bg-inactive)
+      :weight 'bold :extend t)
+
+    ;; Overlays to extend date header backgrounds to window edge
+    (defun my/org-agenda-extend-date-faces ()
+      "Add overlays on agenda date lines so :extend t reaches the edge."
+      (save-excursion
+        (goto-char (point-min))
+        (while (not (eobp))
+          (let ((face (get-text-property (point) 'face)))
+            (when (memq face '(org-agenda-date org-agenda-date-today
+                               org-agenda-date-weekend
+                               org-agenda-date-weekend-today))
+              (let ((ov (make-overlay (line-beginning-position)
+                                      (line-beginning-position 2))))
+                (overlay-put ov 'face face)
+                (overlay-put ov 'evaporate t))))
+          (forward-line 1))))
+    (add-hook 'org-agenda-finalize-hook #'my/org-agenda-extend-date-faces)
+
     (my/org-font-setup))
 
   (use-package evil-org
@@ -474,6 +524,11 @@ Old font settings:
     :config
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys))
+
+  (use-package org-edna
+    :after org
+    :config
+    (org-edna-mode))
 #+end_src
 
 ** org-roam
