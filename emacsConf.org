@@ -150,7 +150,7 @@ Fast spell checker with multi-language support (requires libenchant). On non-Nix
       "b" '(consult-buffer :which-key "buffer menu")
       "k" '(kill-buffer :which-key "kill buffer")
       "C-k" '(kill-buffer-and-window :which-key "kill buffer and window")
-      "e" '(elfeed :which-key "elfeed")
+      "e" '(elfeed-summary :which-key "elfeed")
       ))
 #+end_src
 
@@ -581,6 +581,7 @@ Old font settings:
                 (overlay-put ov 'evaporate t))))
           (forward-line 1))))
     (add-hook 'org-agenda-finalize-hook #'my/org-agenda-extend-date-faces)
+    (add-hook 'org-agenda-mode-hook (lambda () (display-line-numbers-mode -1)))
 
     (my/org-font-setup))
 
@@ -1733,15 +1734,38 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
     (require 'elfeed-org)
     (elfeed-org)
 
-    ;; Display entry in a split pane
-    (setq elfeed-show-entry-switch #'elfeed-display-buffer)
-    (defun elfeed-display-buffer (buf &optional act)
-      (pop-to-buffer buf)
-      (set-window-text-height (get-buffer-window) (round (* 0.7 (frame-height)))))
+    (setq elfeed-show-entry-switch #'switch-to-buffer)
 
     ;; Use eww to read articles inside Emacs (S-RET / go)
     (add-hook 'elfeed-show-mode-hook
               (lambda () (setq-local browse-url-browser-function #'eww-browse-url))))
+#+end_src
+
+Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magit-section~ for folding (~TAB~). Press ~RET~ on a feed or group to open a filtered search.
+#+begin_src emacs-lisp
+  (use-package elfeed-summary
+    :after elfeed
+    :commands (elfeed-summary)
+    :config
+    (setq elfeed-summary-settings
+          '((auto-tags)
+            (group (:title . "Searches")
+                   (:elements
+                    (search (:filter . "+unread") (:title . "All Unread"))
+                    (search (:filter . "@1-week-ago") (:title . "Last Week"))))))
+    (setq elfeed-summary-other-window nil)
+
+    ;; Style group headers
+    (defface my/elfeed-summary-group-face
+      `((t (:foreground ,(modus-themes-get-color-value 'magenta)
+            :weight bold :height 1.2)))
+      "Face for elfeed-summary group headers.")
+    (setq elfeed-summary-group-faces '(my/elfeed-summary-group-face))
+
+    ;; Hide line numbers
+    (add-hook 'elfeed-summary-mode-hook (lambda () (display-line-numbers-mode -1)))
+    (add-hook 'elfeed-search-mode-hook (lambda () (display-line-numbers-mode -1)))
+    (add-hook 'elfeed-show-mode-hook (lambda () (display-line-numbers-mode -1))))
 #+end_src
 
 * Scratch buffer
