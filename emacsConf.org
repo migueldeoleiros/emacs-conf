@@ -272,6 +272,16 @@ Brief pulse highlight on cursor jumps. By Prot (modus-themes author).
     (pulsar-global-mode))
 #+end_src
 
+
+** Evil-goggles
+Briefly highlights the affected region on evil operations
+#+begin_src emacs-lisp
+  (use-package evil-goggles
+    :after evil
+    :config
+    (evil-goggles-mode))
+#+end_src
+
 ** Theme
 #+begin_src emacs-lisp
   ;;; THEME
