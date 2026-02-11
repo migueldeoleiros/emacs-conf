@@ -1335,6 +1335,38 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
+Custom "Open With..." embark action (~C-. X~ on a file). Uses XDG desktop entries to show only applications registered for the file's MIME type.
+#+begin_src emacs-lisp
+  (with-eval-after-load 'embark
+    (defun my/embark-open-with (file)
+      "Open FILE with a program chosen from XDG desktop applications."
+      (interactive "fFile: ")
+      (require 'xdg)
+      (require 'mailcap)
+      (setq file (expand-file-name file))
+      (let* ((mime (mailcap-extension-to-mime
+                    (file-name-extension file)))
+             (apps (and mime (xdg-mime-apps mime)))
+             (entries (mapcar #'xdg-desktop-read-file apps))
+             (names (mapcar (lambda (e) (gethash "Name" e)) entries))
+             (choice (completing-read
+                      (format "Open %s with: "
+                              (file-name-nondirectory file))
+                      names nil t))
+             (entry (seq-find (lambda (e)
+                                (equal (gethash "Name" e) choice))
+                              entries))
+             (exec (gethash "Exec" entry)))
+        (when exec
+          (let* ((cmd (replace-regexp-in-string
+                       "%[fFuU]" (shell-quote-argument file)
+                       (replace-regexp-in-string "%[ick]" "" exec)
+                       t t))
+                 (args (split-string-shell-command cmd)))
+            (apply #'start-process (car args) nil args)))))
+    (define-key embark-file-map "X" #'my/embark-open-with))
+#+end_src
+
 Edit grep results in-place. Workflow: ~consult-grep~ → ~embark-export~ (~C-c C-e~) → edit matches → ~C-c C-c~ to apply.
 #+begin_src emacs-lisp
   ;;wgrep
