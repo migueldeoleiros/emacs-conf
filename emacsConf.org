@@ -1739,7 +1739,13 @@ Based in [[https://systemcrafters.net/emacs-tips/presentations-with-org-present/
     (require 'elfeed-org)
     (elfeed-org)
 
+    ;; Show all articles, not just unread
+    (setq elfeed-search-filter "@6-months-ago")
+
+    ;; Reuse the same window for all elfeed buffers (no splits)
     (setq elfeed-show-entry-switch #'switch-to-buffer)
+    (add-to-list 'display-buffer-alist
+                 '("\\*elfeed" (display-buffer-same-window)))
 
     ;; Use eww to read articles inside Emacs (S-RET / go)
     (add-hook 'elfeed-show-mode-hook
@@ -1757,6 +1763,7 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
             (group (:title . "Searches")
                    (:elements
                     (search (:filter . "+unread") (:title . "All Unread"))
+                    (search (:filter . "-unread") (:title . "All Read"))
                     (search (:filter . "@1-week-ago") (:title . "Last Week"))))))
     (setq elfeed-summary-other-window nil)
 
