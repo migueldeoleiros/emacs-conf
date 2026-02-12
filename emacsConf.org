@@ -1202,11 +1202,6 @@ This doesn't seem much better than just using a terminal on the side, but suppos
     (setq delete-by-moving-to-trash t)
     (setq dired-listing-switches
           "-l --almost-all --human-readable --group-directories-first --no-group")
-    (setq dirvish-open-with-programs
-      (append dirvish-open-with-programs '(
-        (("xlsx" "docx" "doc" "odt" "ods") "libreoffice" "%f")
-        (("jpg" "jpeg" "png")              "eog" "%f")
-        (("pdf")                           "zathura" "%f"))))
     :bind
     (("C-c f" . dirvish-fd)
      :map dirvish-mode-map
@@ -1233,10 +1228,20 @@ This doesn't seem much better than just using a terminal on the side, but suppos
   (dirvish-side-follow-mode)
 #+end_src
 
-** pdf-tools
+** emacs-reader
 #+begin_src emacs-lisp
-  ;;pdf-tools
-  (use-package pdf-tools)
+  (use-package reader
+    :vc (:url "https://codeberg.org/MonadicSheep/emacs-reader"
+         :make "all")
+    :mode (("\\.pdf\\'"  . reader-mode)
+           ("\\.epub\\'" . reader-mode)
+           ("\\.mobi\\'" . reader-mode)
+           ("\\.cbz\\'"  . reader-mode))
+    :hook (reader-mode . (lambda ()
+                           (display-line-numbers-mode 0)
+                           (set-fringe-mode 0)
+                           (let ((margin (max 0 (/ (- (window-total-width) 100) 2))))
+                             (set-window-margins (selected-window) margin margin)))))
 #+end_src
 
 * Minibuffer completion
