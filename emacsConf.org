@@ -1843,6 +1843,22 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
 #+begin_src emacs-lisp
   ;;; Other configurations
 
+  ;; use wl-copy/wl-paste for clipboard to avoid legacy X11 types
+  ;; (COMPOUND_TEXT/STRING) that break accents in Chrome
+  (when (and (getenv "WAYLAND_DISPLAY") (executable-find "wl-copy"))
+    (setq interprogram-cut-function
+          (lambda (text)
+            (let ((process-connection-type nil))
+              (let ((proc (start-process "wl-copy" nil "wl-copy")))
+                (process-send-string proc text)
+                (process-send-eof proc)))))
+    (setq interprogram-paste-function
+          (lambda ()
+            (let ((result (with-output-to-string
+                            (with-current-buffer standard-output
+                              (call-process "wl-paste" nil t nil "--no-newline")))))
+              (unless (string-empty-p result) result)))))
+
   ;; always ask for `y` or `n` instead of `yes` or `no`
   (setq use-short-answers t)
 
