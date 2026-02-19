@@ -1846,8 +1846,11 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
   ;; use wl-copy/wl-paste for clipboard to avoid legacy X11 types
   ;; (COMPOUND_TEXT/STRING) that break accents in Chrome
   (when (and (getenv "WAYLAND_DISPLAY") (executable-find "wl-copy"))
+    (defvar my/wl-last-copied nil
+      "Last text sent to wl-copy, to preserve Evil yank type metadata.")
     (setq interprogram-cut-function
           (lambda (text)
+            (setq my/wl-last-copied text)
             (let ((process-connection-type nil))
               (let ((proc (start-process "wl-copy" nil "wl-copy")))
                 (process-send-string proc text)
@@ -1857,7 +1860,9 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
             (let ((result (with-output-to-string
                             (with-current-buffer standard-output
                               (call-process "wl-paste" nil t nil "--no-newline")))))
-              (unless (string-empty-p result) result)))))
+              (unless (or (string-empty-p result)
+                          (string= result my/wl-last-copied))
+                result)))))
 
   ;; always ask for `y` or `n` instead of `yes` or `no`
   (setq use-short-answers t)
