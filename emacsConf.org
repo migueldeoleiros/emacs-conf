@@ -665,10 +665,15 @@ Old font settings:
       (member tag-name (org-roam-node-tags node))))
 
   (defun my/org-roam-list-notes-by-tag (tag-name)
-    (mapcar #'org-roam-node-file
-            (seq-filter
-             (my/org-roam-filter-by-tag tag-name)
-             (org-roam-node-list))))
+    (seq-uniq
+     (seq-remove
+      (lambda (file)
+        (string-match-p "sync-conflict" file))
+      (mapcar #'org-roam-node-file
+              (seq-filter
+               (my/org-roam-filter-by-tag tag-name)
+               (org-roam-node-list))))
+     #'string=))
 
   (defun my/org-roam-refresh-agenda-list ()
     (interactive)
@@ -678,6 +683,185 @@ Old font settings:
   ;; Build the agenda list lazily before org-agenda calls
   (advice-add 'org-agenda :before
     (lambda (&rest _) (my/org-roam-refresh-agenda-list)))
+
+  (use-package org-caldav
+    :after org
+    :commands (org-caldav-sync org-caldav-sync-calendar)
+    :custom
+    (org-caldav-url "https://cal.migueldeoleiros.com")
+    (org-caldav-calendar-id "miguel/org-agenda")
+    (org-caldav-inbox "~/notes/org-caldav-inbox.org")
+    (org-caldav-sync-direction 'org->cal)
+    (org-icalendar-include-todo nil)
+    (org-icalendar-use-scheduled '(todo-start event-if-todo))
+    (org-icalendar-use-deadline '(todo-due event-if-todo))
+    (org-icalendar-timezone "Europe/Madrid")
+    :config
+    (defun my/org-caldav-refresh-files (&rest _)
+      "Sync the same files currently used by `org-agenda'."
+      (my/org-roam-refresh-agenda-list)
+      (setq org-caldav-files org-agenda-files))
+
+    (defun my/org-caldav-auth-header ()
+      "Build a CalDAV Basic auth header from auth-source."
+      (require 'auth-source)
+      (require 'base64)
+      (when-let* ((auth (car (auth-source-search
+                              :host "cal.migueldeoleiros.com"
+                              :require '(:user :secret))))
+                  (user (plist-get auth :user))
+                  (secret (plist-get auth :secret))
+                  (password (if (functionp secret) (funcall secret) secret)))
+        (concat "Basic " (base64-encode-string (concat user ":" password) t))))
+
+    (defun my/org-caldav-with-auth (orig url &optional request-method request-data extra-headers)
+      "Add CalDAV credentials from auth-source to org-caldav requests."
+      (apply orig url request-method request-data
+             (if-let ((auth-header (my/org-caldav-auth-header)))
+                 (cons `("Authorization" . ,auth-header) extra-headers)
+               extra-headers)
+             nil))
+
+    (defun my/org-caldav-retry-nil-response (orig &rest args)
+      "Retry CalDAV requests when `url-retrieve-synchronously' returns nil."
+      (let ((tries 0)
+            response)
+        (while (and (null response)
+                    (< tries org-caldav-retry-attempts))
+          (setq tries (1+ tries))
+          (setq response (apply orig args))
+          (when (and (null response)
+                     (< tries org-caldav-retry-attempts))
+            (sleep-for 1)))
+        (or response
+            (error "CalDAV request returned no response after %d tries: %s"
+                   tries (car args)))))
+
+    (defun my/org-caldav-org-id-from-calendar-uid (uid)
+      "Return the Org ID part of an org-icalendar generated UID."
+      (if (stringp uid)
+          (replace-regexp-in-string "\\`\\(DL\\|SC\\|TS\\|TODO\\|DS\\)[0-9]*-" "" uid)
+        uid))
+
+    (defun my/org-caldav-generate-md5-for-calendar-uid (orig uid)
+      "Find the Org entry for UID even when UID names one exported timestamp."
+      (funcall orig (my/org-caldav-org-id-from-calendar-uid uid)))
+
+    (defun my/org-caldav-id-goto-calendar-uid (orig id &rest args)
+      "Let org-caldav find Org entries for prefixed calendar UIDs."
+      (apply orig (my/org-caldav-org-id-from-calendar-uid id) args))
+
+    (defun my/org-caldav-id-find-calendar-uid (orig id &rest args)
+      "Let org-caldav find Org entries for prefixed calendar UIDs."
+      (apply orig (my/org-caldav-org-id-from-calendar-uid id) args))
+
+    (defun my/org-caldav-narrow-to-uid (uid)
+      "Narrow the current iCalendar buffer to UID."
+      (widen)
+      (goto-char (point-min))
+      (unless (re-search-forward (concat "^UID:\\s-*" (regexp-quote uid) "\\s-*$") nil t)
+        (error "Could not find UID %s" uid))
+      (org-caldav-narrow-event-under-point))
+
+    (defun my/org-caldav-update-events-in-cal (orig icsbuf)
+      "Use exact UID lookup when uploading events to CalDAV."
+      (cl-letf (((symbol-function 'org-caldav-narrow-event-under-point)
+                 (symbol-function 'org-caldav-narrow-event-under-point)))
+        (with-current-buffer icsbuf
+          (widen)
+          (goto-char (point-min))
+          (let ((events (append (org-caldav-filter-events 'new-in-org)
+                                (org-caldav-filter-events 'changed-in-org)))
+                (counter 0)
+                (url-show-status nil)
+                (event-etag (org-caldav-get-event-etag-list)))
+            (dolist (cur events)
+              (setq counter (1+ counter))
+              (if (eq (org-caldav-event-etag cur) 'put)
+                  (org-caldav-debug-print 1
+                                          (format "Event UID %s: Was already put previously." (car cur)))
+                (org-caldav-debug-print 1
+                                        (format "Event UID %s: Org --> Cal" (car cur)))
+                (my/org-caldav-narrow-to-uid (car cur))
+                (org-caldav-convert-buffer-to-crlf)
+                (org-caldav-cleanup-ics-description)
+                (org-caldav-maybe-fix-timezone)
+                (org-caldav-set-sequence-number cur event-etag)
+                (org-caldav-fix-todo-priority)
+                (org-caldav-fix-todo-status-percent-state)
+                (org-caldav-fix-categories)
+                (org-caldav-fix-todo-dtstart)
+                (org-caldav-fix-todo-remove-until)
+                (message "Putting event %d of %d Org --> Cal" counter (length events))
+                (if (org-caldav-put-event icsbuf)
+                    (org-caldav-event-set-etag cur 'put)
+                  (org-caldav-debug-print 1
+                                          (format "Event UID %s: Error while doing Org --> Cal" (car cur)))
+                  (org-caldav-event-set-status cur 'error)
+                  (push (list org-caldav-calendar-id (car cur)
+                              'error 'error:org->cal)
+                        org-caldav-sync-result))))
+            (setq event-etag (org-caldav-get-event-etag-list))
+            (dolist (cur events)
+              (let ((etag (assoc (car cur) event-etag)))
+                (when (and (not (eq (org-caldav-event-status cur) 'error))
+                           etag)
+                  (org-caldav-event-set-etag cur (cdr etag))
+                  (push (list org-caldav-calendar-id (car cur)
+                              (org-caldav-event-status cur) 'org->cal)
+                        org-caldav-sync-result))))
+            (unless (eq org-caldav-delete-calendar-entries 'never)
+              (let ((events (org-caldav-filter-events 'deleted-in-org))
+                    (url-show-status nil)
+                    (counter 0))
+                (dolist (cur events)
+                  (setq counter (1+ counter))
+                  (when (or (eq org-caldav-delete-calendar-entries 'always)
+                            (y-or-n-p (format "Delete event '%s' from external calendar?"
+                                               (org-caldav-get-calendar-summary-from-uid
+                                                (car cur)))))
+                    (message "Deleting event %d from %d" counter (length events))
+                    (org-caldav-delete-event (car cur))
+                    (push (list org-caldav-calendar-id (car cur)
+                                'deleted-in-org 'removed-from-cal)
+                          org-caldav-sync-result)
+                    (setq org-caldav-event-list
+                          (delete cur org-caldav-event-list))))))
+            (dolist (cur (org-caldav-filter-events 'error))
+              (setq org-caldav-event-list
+                    (delete cur org-caldav-event-list)))))))
+
+    (defun my/org-caldav-without-babel-execution (orig &rest args)
+      "Export CalDAV data without running Org Babel source blocks."
+      (let ((org-export-use-babel nil))
+        (apply orig args)))
+
+    (defun org-caldav-get-uid ()
+      "Get UID for event in current buffer without merging timestamp instances.
+
+The upstream org-caldav implementation strips org-icalendar prefixes like
+TS1-/TS2-.  That makes multiple timestamps on one Org heading look like
+duplicate CalDAV entries with the same UID.  Keeping the prefix gives every
+exported timestamp its own calendar UID."
+      (if (re-search-forward "^UID:\\s-*\\(.+\\)\\s-*$" nil t)
+          (let ((uid (match-string 1)))
+            (while (progn (forward-line)
+                          (looking-at " \\(.+\\)\\s-*$"))
+              (setq uid (concat uid (match-string 1))))
+            (while (string-match "\\s-+" uid)
+              (setq uid (replace-match "" nil nil uid)))
+            uid)
+        (error "No UID could be found for current event.")))
+
+    (advice-add 'org-caldav-url-retrieve-synchronously :around #'my/org-caldav-with-auth)
+    (advice-add 'org-caldav-url-retrieve-synchronously :around #'my/org-caldav-retry-nil-response)
+    (advice-add 'org-caldav-generate-md5-for-org-entry :around #'my/org-caldav-generate-md5-for-calendar-uid)
+    (advice-add 'org-id-goto :around #'my/org-caldav-id-goto-calendar-uid)
+    (advice-add 'org-id-find :around #'my/org-caldav-id-find-calendar-uid)
+    (advice-add 'org-caldav-generate-ics :around #'my/org-caldav-without-babel-execution)
+    (advice-add 'org-caldav-update-events-in-cal :around #'my/org-caldav-update-events-in-cal)
+    (advice-add 'org-caldav-sync :before #'my/org-caldav-refresh-files)
+    (advice-add 'org-caldav-sync-calendar :before #'my/org-caldav-refresh-files))
 
   (defun my/org-roam-project-finalize-hook ()
     "Adds the captured project file to `org-agenda-files' if the
@@ -1911,4 +2095,3 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
                         (url-hexify-string url))))
 
 #+end_src
-
