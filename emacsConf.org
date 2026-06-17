@@ -1104,12 +1104,24 @@ Drag-and-drop and paste images into org files.
     :hook (prog-mode . flycheck-mode))
 #+end_src
 
+** EditorConfig
+Respect each project's ~.editorconfig~ settings across all languages before language-specific formatters run.
+#+begin_src emacs-lisp
+  ;;editorconfig
+  (use-package editorconfig
+    :diminish editorconfig-mode
+    :config
+    (editorconfig-mode 1))
+#+end_src
+
 ** apheleia
-Auto-format on save (prettier, black, rustfmt, etc.).
+Auto-format on save (prettier, black, rustfmt, etc.). Enabled after EditorConfig so project settings are applied before formatters run.
 #+begin_src emacs-lisp
   ;;apheleia
   (use-package apheleia
-    :init (apheleia-global-mode))
+    :after editorconfig
+    :config
+    (apheleia-global-mode))
 #+end_src
 
 ** corfu
@@ -1189,7 +1201,6 @@ Tree-sitter aware indentation guide lines.
 ** C/C++
 #+begin_src emacs-lisp
   ;;C/C++
-  (setq-default fill-column 80)
   (add-hook 'c-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'c-ts-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'c++-mode-hook 'display-fill-column-indicator-mode)
@@ -1263,11 +1274,12 @@ Tree-sitter aware indentation guide lines.
      ".astro$"
      ".blade.php$")
     :config
-    (setq web-mode-markup-indent-offset 4
-          web-mode-css-indent-offset 4
-          web-mode-code-indent-offset 4
-          web-mode-style-padding 4
-          web-mode-script-padding 4
+    ;; Fallbacks only. Project .editorconfig / Prettier should override these.
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-style-padding 2
+          web-mode-script-padding 2
           web-mode-enable-auto-closing t
           web-mode-enable-auto-opening t
           web-mode-enable-auto-pairing nil
@@ -2058,12 +2070,8 @@ Tree-based elfeed overview with collapsible sections grouped by tags. Uses ~magi
         scroll-preserve-screen-position 1)
   (pixel-scroll-precision-mode)
 
-  ;; set tab to 4 spaces
-  (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 4)
-  (setq c-default-style "linux")
-  (setq c-basic-offset 4) 
-  (c-set-offset 'comment-intro 0)
+  ;; Indentation is project-owned: .editorconfig first, then formatter configs
+  ;; used by Apheleia (prettier, black, rustfmt, clang-format, etc.).
 
   ;; auto-refresh buffers changed on disk
   (global-auto-revert-mode 1)
