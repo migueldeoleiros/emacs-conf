@@ -950,6 +950,11 @@ Drag-and-drop and paste images into org files.
 
 ** code blocks
 #+begin_src emacs-lisp
+  (use-package ob-mermaid
+    :after org
+    :custom
+    (ob-mermaid-cli-path "mmdc"))
+
   (with-eval-after-load 'org
     ;; source block templates
     (require 'org-tempo)
@@ -961,6 +966,7 @@ Drag-and-drop and paste images into org files.
     (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
     (add-to-list 'org-structure-template-alist '("js" . "src javascript"))
     (add-to-list 'org-structure-template-alist '("xml" . "src xml"))
+    (add-to-list 'org-structure-template-alist '("mermaid" . "src mermaid"))
 
     ;; Org babel for code blocks
     (org-babel-do-load-languages
@@ -971,7 +977,8 @@ Drag-and-drop and paste images into org files.
         ;;(ledger . t)
         (calc . t)
         (ocaml . t)
-        (python . t)))
+        (python . t)
+        (mermaid . t)))
 
     (push '("conf-unix" . conf-unix) org-src-lang-modes))
 #+end_src
