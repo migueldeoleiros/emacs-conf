@@ -105,6 +105,16 @@ Deferred to idle time so it doesn't block startup.
 
 #+end_src
 
+* Remote development
+Remote Java settings can be defined per host in ~remote-java-local.el~.
+#+begin_src emacs-lisp
+  (require 'tramp)
+  (setq tramp-connection-timeout 20)
+  (defvar my/remote-java-profiles nil
+    "Host-specific Java runtime paths, loaded from remote-java-local.el.")
+  (load (expand-file-name "remote-java-local.el" user-emacs-directory) t t)
+#+end_src
+
 Fast spell checker with multi-language support (requires libenchant). On non-NixOS systems with Nix installed, the Nix linker can't find system libs.
 #+begin_src emacs-lisp
   ;;jinx
@@ -1235,14 +1245,58 @@ Tree-sitter aware indentation guide lines.
 ** Java
 #+begin_src emacs-lisp
   ;;Java
+  (defun my/java-setup ()
+    "Apply Java style defaults and optional remote runtime settings before LSP."
+    (setq-local indent-tabs-mode nil
+                  tab-width 2
+                  c-basic-offset 2
+                  fill-column 140)
+    (when-let* ((remote (file-remote-p default-directory)))
+      (setq-local lsp-java-vmargs
+                  (remove (concat "-javaagent:" (expand-file-name "~/.m2/lombok.jar"))
+                          lsp-java-vmargs))
+      (setq-local lsp-java-format-settings-url nil
+                  lsp-java-configuration-maven-user-settings nil)
+      (when-let* ((profile (cdr (assoc (file-remote-p default-directory 'host)
+                                     my/remote-java-profiles))))
+        (setq-local lsp-java-server-install-dir
+                    (concat remote (plist-get profile :server-dir))
+                    lsp-java-workspace-dir
+                    (expand-file-name
+                     (secure-hash 'sha256 (lsp-java--get-root))
+                     (concat remote (plist-get profile :workspace-dir)))
+                    lsp-java-workspace-cache-dir
+                    (expand-file-name ".cache/" lsp-java-workspace-dir)
+                    lsp-java-configuration-maven-user-settings
+                    (plist-get profile :maven-settings)
+                    lsp-java-format-settings-url
+                    (plist-get profile :formatter-url)
+                    lsp-java-format-settings-profile
+                    (or (plist-get profile :formatter-profile)
+                        lsp-java-format-settings-profile))))
+    (unless (file-remote-p default-directory)
+      (lsp-java-boot-lens-mode))
+    (if (or (not (file-remote-p default-directory))
+            (assoc (file-remote-p default-directory 'host) my/remote-java-profiles))
+        (lsp-deferred)
+      (message "Configure host %s in remote-java-local.el to enable Java LSP"
+               (file-remote-p default-directory 'host))))
+
+
   (use-package lsp-java
-    :hook ((java-mode . lsp-deferred)
-           (java-ts-mode . lsp-deferred))
+    :demand t
+    :hook ((java-mode . my/java-setup)
+           (java-ts-mode . my/java-setup))
     :custom
     (lsp-java-configuration-maven-user-settings (expand-file-name "~/.m2/settings.xml"))
+    (lsp-java-format-settings-url
+     (let ((file (expand-file-name "java/eclipse-java-google-style.xml" user-emacs-directory)))
+       (when (file-exists-p file) (concat "file://" file))))
+    (lsp-java-completion-import-order ["java" "javax" "org" "com"])
+    (lsp-java-save-actions-organize-imports t)
+    (lsp-java-sources-organize-imports-star-threshold 99)
+    (lsp-java-sources-organize-imports-static-star-threshold 99)
     :config
-    (add-hook 'java-mode-hook #'lsp-java-boot-lens-mode)
-    (add-hook 'java-ts-mode-hook #'lsp-java-boot-lens-mode)
     (dolist (dir '("[/\\\\]target\\'"
                    "[/\\\\]\\.gradle\\'"
                    "[/\\\\]build\\'"
@@ -1611,7 +1665,8 @@ Edit grep results in-place. Workflow: ~consult-grep~ → ~embark-export~ (~C-c C
   ;;projectile
   (use-package projectile
     :diminish projectile-mode
-    :config (projectile-mode)
+    :config
+    (projectile-mode)
     :custom ((projectile-completion-system 'default))
     :bind-keymap
     ("C-c p" . projectile-command-map)
