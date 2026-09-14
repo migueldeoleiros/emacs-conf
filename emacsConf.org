@@ -131,7 +131,7 @@ Fast spell checker with multi-language support (requires libenchant). On non-Nix
     (jinx-exclude-regexps
      '((t "[぀-ヿ㐀-䶵一-鿿豈-頻々〇〻ぁ-ゖァ-ヺー\u3000-\u303f\uff00-\uffef\U00020000-\U0002a6df]+"))))
 
-  (use-package go-translate
+  (use-package gt
     :config
     (setq gt-langs '(es en))
     (setq gt-default-translator (gt-translator :engines (gt-google-engine))))
